@@ -1,11 +1,13 @@
 import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import * as moment from 'moment';
+import { Model } from 'mongoose';
 import { CreateShortUrlDto } from './shortner.dto';
 import { ShortUrlProps } from './shortner.model';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 
 @Injectable()
 export class ShortnerService {
+  private readonly DOMAIN = 'http://localhost:3000';
   constructor(
     @InjectModel('ShortUrlModel')
     private readonly shortUrlModel: Model<ShortUrlProps>,
@@ -24,18 +26,29 @@ export class ShortnerService {
     return randomFourCharacters;
   };
 
+  checkUrlExpiration = (expirationTime) => {
+    const currentTime = moment().unix();
+    if (expirationTime < currentTime) {
+      return true;
+    }
+  };
+
+  noPageFound = () => {
+    return `${this.DOMAIN}/404`;
+  };
+
   createShortURL = async (
     createShortUrlDto: CreateShortUrlDto,
   ): Promise<string> => {
-    const { url } = createShortUrlDto;
+    const { expirationTime = null, url } = createShortUrlDto;
     const shortAlias = this.generateRandomAlphaNumeric();
     //Todo - Move to .env
-    const domain = 'http://localhost:3000';
-    const shortUrl = `${domain}/${shortAlias}`;
+    const shortUrl = `${this.DOMAIN}/${shortAlias}`;
     const newShortUrl = new this.shortUrlModel({
-      url,
-      shortUrl,
+      expirationTime,
       shortAlias,
+      shortUrl,
+      url,
       visitHistory: [],
     });
     await newShortUrl.save();
@@ -44,7 +57,14 @@ export class ShortnerService {
 
   getShortURL = async (id: string): Promise<string> => {
     const response = await this.shortUrlModel.findOne({ shortAlias: id });
-    const { url } = response as any;
-    return url;
+    if (response) {
+      const { expirationTime, url } = response as any;
+      if (this.checkUrlExpiration(expirationTime)) {
+        return this.noPageFound();
+      }
+      return url;
+    } else {
+      return this.noPageFound();
+    }
   };
 }

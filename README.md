@@ -1,7 +1,5 @@
 ## Todo
 
- - Expiration for URLs
- - Redirect URLs expired then standard 404
  - Analytics
  - Comment todo tasks
  - Unit test cases

@@ -2,6 +2,9 @@ import mongoose from 'mongoose';
 
 export const ShortUrlSchema = new mongoose.Schema(
   {
+    expirationTime: {
+      type: Number,
+    },
     shortAlias: {
       type: String,
       unique: true,
@@ -27,6 +30,7 @@ export const ShortUrlSchema = new mongoose.Schema(
 );
 
 export interface ShortUrlProps {
+  expirationTime: number;
   shortAlias: string;
   shortUrl: string;
   url: string;
