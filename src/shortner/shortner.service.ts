@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import * as moment from 'moment';
 import { Model } from 'mongoose';
 import { CreateShortUrlDto } from './shortner.dto';
-import { ShortUrlProps } from './shortner.model';
+import { AnalyticsProps, ShortUrlProps } from './shortner.model';
 
 @Injectable()
 export class ShortnerService {
@@ -11,6 +11,8 @@ export class ShortnerService {
   constructor(
     @InjectModel('ShortUrlModel')
     private readonly shortUrlModel: Model<ShortUrlProps>,
+    @InjectModel('Analytics')
+    private readonly analyticsModel: Model<AnalyticsProps>,
   ) {}
 
   generateRandomAlphaNumeric = () => {
@@ -28,13 +30,70 @@ export class ShortnerService {
 
   checkUrlExpiration = (expirationTime) => {
     const currentTime = moment().unix();
-    if (expirationTime < currentTime) {
+    if (expirationTime && expirationTime < currentTime) {
       return true;
     }
   };
 
   noPageFound = () => {
     return `${this.DOMAIN}/404`;
+  };
+
+  recordAnalytics = async (shortUrl: string, userAgent: string) => {
+    let deviceType: string;
+    let osType: string;
+    let browserType: string;
+
+    if (/iPad/i.test(userAgent)) {
+      deviceType = 'iPad';
+    } else if (/Mobile/i.test(userAgent)) {
+      deviceType = 'Mobile';
+    } else {
+      deviceType = 'Desktop';
+    }
+
+    if (/Android/i.test(userAgent)) {
+      osType = 'Android';
+    } else if (/iPhone/i.test(userAgent)) {
+      osType = 'iPhone';
+    } else if (/Mac OS/i.test(userAgent)) {
+      osType = 'MacOS';
+    } else if (/Windows/i.test(userAgent)) {
+      osType = 'Windows';
+    } else {
+      osType = 'Unknown';
+    }
+
+    if (userAgent.includes('MSIE')) {
+      browserType = 'Internet Explorer';
+    } else if (userAgent.includes('Firefox')) {
+      browserType = 'Firefox';
+    } else if (userAgent.includes('Edg')) {
+      browserType = 'Edge';
+    } else if (userAgent.includes('Chrome')) {
+      browserType = 'Chrome';
+    } else if (userAgent.includes('Safari')) {
+      browserType = 'Safari';
+    } else {
+      browserType = 'Unknown';
+    }
+
+    await this.analyticsModel.updateOne(
+      {
+        shortUrl,
+      },
+      {
+        $inc: {
+          count: 1,
+          [`osType.${osType}`]: 1,
+          [`deviceType.${deviceType}`]: 1,
+          [`browserType.${browserType}`]: 1,
+        },
+      },
+      {
+        upsert: true,
+      },
+    );
   };
 
   createShortURL = async (
@@ -55,10 +114,11 @@ export class ShortnerService {
     return shortUrl;
   };
 
-  getShortURL = async (id: string): Promise<string> => {
+  getShortURL = async (id: string, userAgent: string): Promise<string> => {
     const response = await this.shortUrlModel.findOne({ shortAlias: id });
     if (response) {
-      const { expirationTime, url } = response as any;
+      const { expirationTime, shortUrl, url } = response as any;
+      await this.recordAnalytics(shortUrl, userAgent);
       if (this.checkUrlExpiration(expirationTime)) {
         return this.noPageFound();
       }

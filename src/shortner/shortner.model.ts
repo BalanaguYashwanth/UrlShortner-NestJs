@@ -29,10 +29,42 @@ export const ShortUrlSchema = new mongoose.Schema(
   },
 );
 
+//Todo - Move to seperate module
+export const AnalyticsSchema = new mongoose.Schema(
+  {
+    browserType: Object,
+    count: {
+      type: Number,
+      min: 0,
+    },
+    deviceType: Object,
+    shortUrl: {
+      type: String,
+      unique: true,
+      required: true,
+    },
+    osType: Object,
+  },
+  {
+    timestamps: true,
+  },
+);
+
 export interface ShortUrlProps {
   expirationTime: number;
   shortAlias: string;
   shortUrl: string;
   url: string;
   visitHistory: [];
+}
+
+export interface AnalyticsProps {
+  count: number;
+  deviceTypeCount: DeviceType;
+}
+
+export interface DeviceType {
+  mobile: number;
+  tablet: number;
+  desktop: number;
 }

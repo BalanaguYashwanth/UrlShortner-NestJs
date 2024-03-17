@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Res } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Req, Res } from '@nestjs/common';
 import { ShortnerService } from './shortner.service';
 import { CreateShortUrlDto } from './shortner.dto';
 
@@ -14,8 +14,9 @@ export class ShortnerController {
   }
 
   @Get(':id')
-  async getLink(@Param('id') id: string, @Res() res) {
-    const url = await this.shortnerService.getShortURL(id);
+  async getLink(@Param('id') id: string, @Req() req, @Res() res) {
+    const userAgent = req.headers['user-agent'] || '';
+    const url = await this.shortnerService.getShortURL(id, userAgent);
     res.redirect(url);
   }
 }

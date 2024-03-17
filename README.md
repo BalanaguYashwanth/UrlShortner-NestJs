@@ -1,7 +1,7 @@
 ## Todo
 
- - Analytics
  - Comment todo tasks
+ - Authentication & Authorization
  - Unit test cases
  - Cron jobs for auto-deletion the expired domain alias
  - Redis for faster URL retrival
