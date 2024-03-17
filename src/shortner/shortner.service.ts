@@ -3,16 +3,16 @@ import { InjectModel } from '@nestjs/mongoose';
 import * as moment from 'moment';
 import { Model } from 'mongoose';
 import { CreateShortUrlDto } from './shortner.dto';
-import { AnalyticsProps, ShortUrlProps } from './shortner.model';
+import { TimeAnalyticsProps, UrlHistoryProps } from './shortner.model';
 
 @Injectable()
 export class ShortnerService {
   private readonly DOMAIN = 'http://localhost:3000';
   constructor(
-    @InjectModel('ShortUrlModel')
-    private readonly shortUrlModel: Model<ShortUrlProps>,
-    @InjectModel('Analytics')
-    private readonly analyticsModel: Model<AnalyticsProps>,
+    @InjectModel('UrlHistory')
+    private readonly urlHistoryModel: Model<UrlHistoryProps>,
+    @InjectModel('TimeAnalytics')
+    private readonly timeAnalyticsModel: Model<TimeAnalyticsProps>,
   ) {}
 
   generateRandomAlphaNumeric = () => {
@@ -39,7 +39,12 @@ export class ShortnerService {
     return `${this.DOMAIN}/404`;
   };
 
-  recordAnalytics = async (shortUrl: string, userAgent: string) => {
+  recordAnalytics = async (
+    id: string,
+    ref: string,
+    shortUrl: string,
+    userAgent: string,
+  ) => {
     let deviceType: string;
     let osType: string;
     let browserType: string;
@@ -57,7 +62,7 @@ export class ShortnerService {
     } else if (/iPhone/i.test(userAgent)) {
       osType = 'iPhone';
     } else if (/Mac OS/i.test(userAgent)) {
-      osType = 'MacOS';
+      osType = 'Mac';
     } else if (/Windows/i.test(userAgent)) {
       osType = 'Windows';
     } else {
@@ -77,21 +82,26 @@ export class ShortnerService {
     } else {
       browserType = 'Unknown';
     }
+    const now = new Date();
+    await this.timeAnalyticsModel.create({
+      shortUrlId: id,
+      clickedAt: now,
+    });
 
-    await this.analyticsModel.updateOne(
+    const query = {
+      clicks: 1,
+      [`osType.${osType}`]: 1,
+      [`deviceType.${deviceType}`]: 1,
+      [`browserType.${browserType}`]: 1,
+      [`refType.${ref}`]: 1,
+    };
+
+    await this.urlHistoryModel.updateOne(
       {
         shortUrl,
       },
       {
-        $inc: {
-          count: 1,
-          [`osType.${osType}`]: 1,
-          [`deviceType.${deviceType}`]: 1,
-          [`browserType.${browserType}`]: 1,
-        },
-      },
-      {
-        upsert: true,
+        $inc: query,
       },
     );
   };
@@ -103,22 +113,25 @@ export class ShortnerService {
     const shortAlias = this.generateRandomAlphaNumeric();
     //Todo - Move to .env
     const shortUrl = `${this.DOMAIN}/${shortAlias}`;
-    const newShortUrl = new this.shortUrlModel({
+    const newShortUrl = new this.urlHistoryModel({
       expirationTime,
       shortAlias,
       shortUrl,
       url,
-      visitHistory: [],
     });
     await newShortUrl.save();
     return shortUrl;
   };
 
-  getShortURL = async (id: string, userAgent: string): Promise<string> => {
-    const response = await this.shortUrlModel.findOne({ shortAlias: id });
+  getShortURL = async (
+    id: string,
+    ref: string,
+    userAgent: string,
+  ): Promise<string> => {
+    const response = await this.urlHistoryModel.findOne({ shortAlias: id });
     if (response) {
-      const { expirationTime, shortUrl, url } = response as any;
-      await this.recordAnalytics(shortUrl, userAgent);
+      const { _id, expirationTime, shortUrl, url } = response as any;
+      await this.recordAnalytics(_id, ref, shortUrl, userAgent);
       if (this.checkUrlExpiration(expirationTime)) {
         return this.noPageFound();
       }

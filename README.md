@@ -1,10 +1,13 @@
 ## Todo
 
- - Comment todo tasks
  - Authentication & Authorization
+    - store email
+ - Seperate the modules - clean code
+ - Get analytics based on the user
+ - Comment todo tasks
  - Unit test cases
- - Cron jobs for auto-deletion the expired domain alias
  - Redis for faster URL retrival
+ - Cron jobs for auto-deletion the expired domain alias
 
 ## Description
 

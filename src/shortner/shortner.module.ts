@@ -2,13 +2,17 @@ import { Module } from '@nestjs/common';
 import { ShortnerController } from './shortner.controller';
 import { ShortnerService } from './shortner.service';
 import { MongooseModule } from '@nestjs/mongoose';
-import { AnalyticsSchema, ShortUrlSchema } from './shortner.model';
+import { TimeAnalyticsSchema, UrlHistorySchema } from './shortner.model';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
-      { name: 'ShortUrlModel', schema: ShortUrlSchema },
-      { name: 'Analytics', schema: AnalyticsSchema },
+      {
+        name: 'UrlHistory',
+        schema: UrlHistorySchema,
+        collection: 'urlhistory',
+      },
+      { name: 'TimeAnalytics', schema: TimeAnalyticsSchema },
     ]),
   ],
   controllers: [ShortnerController],
