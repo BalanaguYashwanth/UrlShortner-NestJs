@@ -107,6 +107,7 @@ export class ShortnerService {
   };
 
   createShortURL = async (
+    id: string,
     createShortUrlDto: CreateShortUrlDto,
   ): Promise<string> => {
     const { expirationTime = null, url } = createShortUrlDto;
@@ -118,6 +119,7 @@ export class ShortnerService {
       shortAlias,
       shortUrl,
       url,
+      userId: id,
     });
     await newShortUrl.save();
     return shortUrl;

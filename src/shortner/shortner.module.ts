@@ -3,9 +3,11 @@ import { ShortnerController } from './shortner.controller';
 import { ShortnerService } from './shortner.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { TimeAnalyticsSchema, UrlHistorySchema } from './shortner.model';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   imports: [
+    AuthModule,
     MongooseModule.forFeature([
       {
         name: 'UrlHistory',

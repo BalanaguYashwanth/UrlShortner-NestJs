@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -7,7 +8,9 @@ import {
   Query,
   Req,
   Res,
+  UseGuards,
 } from '@nestjs/common';
+import { JwtGuard } from 'src/auth/guards/jwt-auth.guards';
 import { ShortnerService } from './shortner.service';
 import { CreateShortUrlDto } from './shortner.dto';
 
@@ -17,9 +20,18 @@ export class ShortnerController {
   constructor(private readonly shortnerService: ShortnerService) {}
 
   @Post()
-  async createLink(@Body() createShortUrlDto: CreateShortUrlDto) {
-    const url = await this.shortnerService.createShortURL(createShortUrlDto);
-    return { data: url };
+  @UseGuards(JwtGuard)
+  async createLink(@Body() createShortUrlDto: CreateShortUrlDto, @Req() req) {
+    try {
+      const { id } = req.user;
+      const url = await this.shortnerService.createShortURL(
+        id,
+        createShortUrlDto,
+      );
+      return { data: url };
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
 
   @Get(':id')

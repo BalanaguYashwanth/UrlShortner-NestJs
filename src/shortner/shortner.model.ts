@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 
 export const UrlHistorySchema = new mongoose.Schema(
   {
@@ -31,6 +31,11 @@ export const UrlHistorySchema = new mongoose.Schema(
       unique: true,
       required: true,
     },
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Auth',
+      required: [true, 'Please login and try again'],
+    },
     url: {
       type: String,
       required: [true, 'Url is required'],
@@ -56,6 +61,7 @@ export interface UrlHistoryProps {
   refType: object;
   shortAlias: string;
   shortUrl: string;
+  userId: string;
   url: string;
 }
 
