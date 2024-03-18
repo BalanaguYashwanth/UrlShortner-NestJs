@@ -1,5 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 import * as moment from 'moment';
 import { Model } from 'mongoose';
 import { CreateShortUrlDto } from './shortner.dto';
@@ -13,6 +15,7 @@ export class ShortnerService {
     private readonly urlHistoryModel: Model<UrlHistoryProps>,
     @InjectModel('TimeAnalytics')
     private readonly timeAnalyticsModel: Model<TimeAnalyticsProps>,
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {}
 
   generateRandomAlphaNumeric = () => {
@@ -126,14 +129,21 @@ export class ShortnerService {
   };
 
   getShortURL = async (
-    id: string,
+    shortAlias: string,
     ref: string,
     userAgent: string,
   ): Promise<string> => {
-    const response = await this.urlHistoryModel.findOne({ shortAlias: id });
-    if (response) {
-      const { _id, expirationTime, shortUrl, url } = response as any;
-      await this.recordAnalytics(_id, ref, shortUrl, userAgent);
+    let hasShortUrlDetails;
+    hasShortUrlDetails = await this.cacheManager.get(shortAlias);
+    if (!hasShortUrlDetails) {
+      hasShortUrlDetails = await this.urlHistoryModel.findOne({ shortAlias });
+    }
+
+    if (hasShortUrlDetails) {
+      // If it exists in cache override updated data with ttl or else add cache with ttl
+      await this.cacheManager.set(shortAlias, hasShortUrlDetails, 300000);
+      const { _id, expirationTime, shortUrl, url } = hasShortUrlDetails as any;
+      this.recordAnalytics(_id, ref, shortUrl, userAgent);
       if (this.checkUrlExpiration(expirationTime)) {
         return this.noPageFound();
       }
