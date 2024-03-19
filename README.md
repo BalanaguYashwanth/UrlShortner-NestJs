@@ -109,3 +109,17 @@ $ npm run test:e2e
 # test coverage
 $ npm run test:cov
 ```
+
+## Scalability & Performace optimizations
+
+- Deploying into AWS containers with enabled auto scaling groups by specifying min and max instances
+
+- Distributed caching using redis
+
+- Global Load Balancing to distribute incoming traffic across multiple AWS nodes
+
+- AWS Queues to smooth out spikes in traffic by evenly distributing tasks over time & CDNs
+
+- Severless (AWS lambda) also one option instead of deploying into contains, but serverless sometimes it faces cold start issues & decrease in overall performance sometimes
+
+- Not the least, Metrics helps us to analyse the traffic according to it, we can introduce new implementation for better scalability & performance optimisations
