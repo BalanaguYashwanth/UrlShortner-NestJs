@@ -42,7 +42,7 @@ export class AnalyticsService {
         {
           $project: {
             _id: 0,
-            hour: { $concat: [{ $toString: '$_id' }, ':00:00'] },
+            hour: { $concat: [{ $toString: '$_id' }, ':00:00 GMT'] },
             clicks: '$count',
           },
         },

@@ -14,7 +14,6 @@ import { JwtGuard } from 'src/auth/guards/jwt-auth.guards';
 import { ShortnerService } from './shortner.service';
 import { CreateShortUrlDto } from './shortner.dto';
 
-//Todo - We need to send the userId to this createShortService
 @Controller('/')
 export class ShortnerController {
   constructor(private readonly shortnerService: ShortnerService) {}
@@ -43,6 +42,10 @@ export class ShortnerController {
   ) {
     const userAgent = req.headers['user-agent'] || '';
     const url = await this.shortnerService.getShortURL(id, ref, userAgent);
-    res.redirect(url);
+    if (url) {
+      res.redirect(url);
+    } else {
+      res.send(404);
+    }
   }
 }
