@@ -13,7 +13,7 @@ import {
 
 @Injectable()
 export class ShortnerService {
-  private readonly DOMAIN = 'http://localhost:3000';
+  private readonly DOMAIN = process.env.DOMAIN || 'http://localhost:3000';
   private readonly noPageFound = null;
 
   constructor(
