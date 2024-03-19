@@ -9,6 +9,11 @@
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
+
+## API Documentation
+
+[URLShortner API] (https://documenter.getpostman.com/view/30058115/2sA2xpUAMZ)
+
 ## Installation
 
 ```bash
