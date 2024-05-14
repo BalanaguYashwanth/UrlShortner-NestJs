@@ -11,11 +11,11 @@
 
 ✅ Developed a system to handle URL expirations and auto-deletion after a certain period.
 
-✅  Implemented secure user authentication - signup and signin flows
+✅  Implemented secure user authentication - signup and signin flows.
 
-✅ Each user can only access only to their URLs and associated analytics
+✅ Each user can only access only to their URLs and associated analytics.
 
-✅ Data Management - Mongodb + Redis cache for performance of URL retrieval
+✅ Data Management - Mongodb + Redis cache for performance of URL retrieval.
 
 ✅ Added Advanced Analytics 
 
@@ -25,7 +25,7 @@
 
 - Browser and device types
 
-- All these analytics access via analytics api listed in API documentation
+- All these analytics access via analytics api listed in API documentation.
 
 #### API output
 
