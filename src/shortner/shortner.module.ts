@@ -11,11 +11,11 @@ import { AffiliateSchema } from 'src/adCampaign/adCampaign.model';
 @Module({
   imports: [
     AuthModule,
-    CacheModule.register({
-      store: redisStore,
-      host: 'localhost',
-      port: 6379,
-    }),
+    // CacheModule.register({
+    //   store: redisStore,
+    //   host: 'localhost',
+    //   port: 6379,
+    // }),
     MongooseModule.forFeature([
       {
         name: 'Affiliate',
