@@ -1,12 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
+// import { CACHE_MANAGER } from '@nestjs/cache-manager';
 
 import { getFullnodeUrl, SuiClient } from '@mysten/sui.js/client';
 import { TransactionBlock } from '@mysten/sui.js/transactions';
 import { Ed25519Keypair } from '@mysten/sui.js/keypairs/ed25519';
 
-import { Cache } from 'cache-manager';
+// import { Cache } from 'cache-manager';
 import { Model } from 'mongoose';
 import { CreateShortUrlDto } from './shortner.dto';
 import { TimeAnalyticsProps, UrlHistoryProps } from './shortner.model';
@@ -25,7 +25,7 @@ export class ShortnerService {
     private readonly urlHistoryModel: Model<UrlHistoryProps>,
     @InjectModel('TimeAnalytics')
     private readonly timeAnalyticsModel: Model<TimeAnalyticsProps>,
-    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
+    // @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {
     this.suiClient = new SuiClient({ url: getFullnodeUrl('testnet') });
     this.keyPair = Ed25519Keypair.deriveKeypair(process.env.OWNER_MNEMONIC_KEY);
@@ -78,9 +78,9 @@ export class ShortnerService {
     return shortUrl;
   };
 
-  private createRedisCache = async (key: string, value: any): Promise<void> => {
-    await this.cacheManager.set(key, value, 300000);
-  };
+  // private createRedisCache = async (key: string, value: any): Promise<void> => {
+  //   await this.cacheManager.set(key, value, 300000);
+  // };
 
   updateClickCount = ({
     campaignInfoAddress,
