@@ -1,16 +1,19 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { AffiliateSchema, CampaignSchema } from './adCampaign.model';
+import { AdCampaignController } from './adCampaign.controller';
+import { AdCampaignService } from './adcampaign.service';
+import { ShortnerModule } from 'src/shortner/shortner.module';
+import {
+  TimeAnalyticsSchema,
+  UrlHistorySchema,
+} from 'src/shortner/shortner.model';
 import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-yet';
-import { ShortnerController } from './shortner.controller';
-import { ShortnerService } from './shortner.service';
-import { TimeAnalyticsSchema, UrlHistorySchema } from './shortner.model';
-import { AuthModule } from 'src/auth/auth.module';
-import { AffiliateSchema } from 'src/adCampaign/adCampaign.model';
 
 @Module({
   imports: [
-    AuthModule,
+    ShortnerModule,
     CacheModule.register({
       store: redisStore,
       host: 'localhost',
@@ -18,9 +21,15 @@ import { AffiliateSchema } from 'src/adCampaign/adCampaign.model';
     }),
     MongooseModule.forFeature([
       {
+        name: 'Campaign',
+        schema: CampaignSchema,
+      },
+      {
         name: 'Affiliate',
         schema: AffiliateSchema,
       },
+    ]),
+    MongooseModule.forFeature([
       {
         name: 'UrlHistory',
         schema: UrlHistorySchema,
@@ -29,8 +38,7 @@ import { AffiliateSchema } from 'src/adCampaign/adCampaign.model';
       { name: 'TimeAnalytics', schema: TimeAnalyticsSchema },
     ]),
   ],
-  controllers: [ShortnerController],
-  providers: [ShortnerService],
-  exports: [ShortnerService],
+  controllers: [AdCampaignController],
+  providers: [AdCampaignService],
 })
-export class ShortnerModule {}
+export class AdCampaignModule {}

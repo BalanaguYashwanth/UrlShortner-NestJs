@@ -19,7 +19,7 @@ export class ShortnerController {
   constructor(private readonly shortnerService: ShortnerService) {}
 
   @Post()
-  @UseGuards(JwtGuard)
+  // @UseGuards(JwtGuard)
   async createLink(@Body() createShortUrlDto: CreateShortUrlDto, @Req() req) {
     try {
       const { id } = req.user;
