@@ -92,10 +92,9 @@ export class ShortnerService {
       txb.moveCall({
         arguments: [
           txb.object(campaignInfoAddress),
-          txb.object(campaignProfileAddress),
           txb.object(profileAddress),
         ],
-        target: `${process.env.CAMPAIGN_PACKAGE_ID}::campaign_fund::click_counter`,
+        target: `${process.env.CAMPAIGN_PACKAGE_ID}::campaign_fund::mutate_affiliate_via_campaign`,
       });
       const promiseResponse = this.suiClient.signAndExecuteTransactionBlock({
         transactionBlock: txb,
@@ -126,7 +125,14 @@ export class ShortnerService {
     if (checkUrlExpiration(expirationTime)) {
       return this.noPageFound;
     }
-
+    console.log(
+      '--->',
+      campaignInfoAddress,
+      '--->',
+      campaignProfileAddress,
+      '--->',
+      profileAddress,
+    );
     const response = await this.updateClickCount({
       campaignInfoAddress,
       campaignProfileAddress,

@@ -32,6 +32,7 @@ export class AdCampaignService {
   createAffiliate = async (affiliateDto: AffiliateDto) => {
     const {
       campaignUrl,
+      campaignInfoAddress,
       originalUrl,
       twitterProfile,
       walletAddress,
@@ -42,6 +43,7 @@ export class AdCampaignService {
       console.log('profileAddress-->', profileAddress);
       if (!profileAddress) {
         const profileTx = (await this.handleCreateAffiliateProfile(
+          campaignInfoAddress,
           twitterProfile,
         )) as any;
         console.log('profileTx--->', profileTx);
@@ -51,13 +53,12 @@ export class AdCampaignService {
       }
 
       const affiliateTx = await this.affiliateCampaignProfile({
+        campaignInfoAddress,
         campaignUrl,
         profileAddress: profileTxAddress,
         walletAddress,
       });
-      const affiliateAddress = affiliateTx.effects?.created[0]?.reference
-        ?.objectId as any;
-
+      console.log('affiiatetx--->', affiliateTx);
       // const linkTx = await this.linkCampaignProfileToCampaignParentObj(
       //   campaignInfoAddress,
       //   affiliateAddress,
@@ -75,7 +76,7 @@ export class AdCampaignService {
         urlAlias,
         linkTxAddress: '',
         profileAddress: profileTxAddress,
-        campaignProfileAddress: affiliateAddress,
+        campaignProfileAddress: '',
       })) as any;
 
       console.log('affiliateResponse--->', affiliateResponse);
@@ -107,6 +108,7 @@ export class AdCampaignService {
   };
 
   handleCreateAffiliateProfile = async (
+    campaignInfoAddress: string,
     twitterProfile: string,
   ): Promise<any> => {
     return new Promise<void>((resolve) => {
@@ -114,6 +116,7 @@ export class AdCampaignService {
       txb.moveCall({
         arguments: [
           txb.object(process.env.CAMPAIGN_CONFIG),
+          txb.object(campaignInfoAddress),
           txb.pure.string(twitterProfile),
         ],
         target: `${process.env.CAMPAIGN_PACKAGE_ID}::campaign_fund::create_affiliate_profile`,
@@ -131,22 +134,20 @@ export class AdCampaignService {
   };
 
   affiliateCampaignProfile = ({
-    campaignUrl,
+    campaignInfoAddress,
     profileAddress,
     walletAddress,
   }: any): any => {
     return new Promise((resolve) => {
+      console.log('----->', campaignInfoAddress, profileAddress, walletAddress);
       const txb = new TransactionBlock();
       txb.moveCall({
         arguments: [
-          txb.pure.u64(parseInt('0')),
-          txb.pure.u64(parseInt('0')),
-          txb.pure.string(campaignUrl),
-          txb.pure.address(profileAddress),
+          txb.object(campaignInfoAddress),
+          txb.object(profileAddress),
           txb.pure.address(walletAddress),
-          txb.object(process.env.CAMPAIGN_CONFIG),
         ],
-        target: `${process.env.CAMPAIGN_PACKAGE_ID}::campaign_fund::create_affiliate`,
+        target: `${process.env.CAMPAIGN_PACKAGE_ID}::campaign_fund::create_affiliate_campaign`,
       });
 
       const promiseResponse = this.suiClient.signAndExecuteTransactionBlock({
