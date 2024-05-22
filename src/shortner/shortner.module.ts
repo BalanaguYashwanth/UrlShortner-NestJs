@@ -1,25 +1,26 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { CacheModule } from '@nestjs/cache-manager';
-import { redisStore } from 'cache-manager-redis-yet';
 import { ShortnerController } from './shortner.controller';
 import { ShortnerService } from './shortner.service';
 import { TimeAnalyticsSchema, UrlHistorySchema } from './shortner.model';
 import { AuthModule } from 'src/auth/auth.module';
-import { AffiliateSchema } from 'src/adCampaign/adCampaign.model';
+import {
+  AffiliateSchema,
+  CampaignSchema,
+} from 'src/adCampaign/adCampaign.model';
+import { HandleUserClicksOps } from './common/handleUserClicksOps.helpers';
 
 @Module({
   imports: [
     AuthModule,
-    // CacheModule.register({
-    //   store: redisStore,
-    //   host: 'localhost',
-    //   port: 6379,
-    // }),
     MongooseModule.forFeature([
       {
         name: 'Affiliate',
         schema: AffiliateSchema,
+      },
+      {
+        name: 'Campaign',
+        schema: CampaignSchema,
       },
       {
         name: 'UrlHistory',
@@ -30,7 +31,7 @@ import { AffiliateSchema } from 'src/adCampaign/adCampaign.model';
     ]),
   ],
   controllers: [ShortnerController],
-  providers: [ShortnerService],
+  providers: [ShortnerService, HandleUserClicksOps],
   exports: [ShortnerService],
 })
 export class ShortnerModule {}

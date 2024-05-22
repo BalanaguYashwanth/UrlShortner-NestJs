@@ -1,23 +1,15 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-// import { CACHE_MANAGER } from '@nestjs/cache-manager';
-
-import { getFullnodeUrl, SuiClient } from '@mysten/sui.js/client';
-import { TransactionBlock } from '@mysten/sui.js/transactions';
-import { Ed25519Keypair } from '@mysten/sui.js/keypairs/ed25519';
-
-// import { Cache } from 'cache-manager';
 import { Model } from 'mongoose';
-import { CreateShortUrlDto } from './shortner.dto';
+import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
 import { TimeAnalyticsProps, UrlHistoryProps } from './shortner.model';
+import { CreateShortUrlDto } from './shortner.dto';
 import { checkUrlExpiration, mapUserAgentToDeviceInfo } from './helpers';
+import { HandleUserClicksOps } from './common/handleUserClicksOps.helpers';
 
 @Injectable()
 export class ShortnerService {
-  private readonly DOMAIN = process.env.DOMAIN || 'http://localhost:3000';
   private readonly noPageFound = null;
-  private suiClient;
-  private keyPair;
+  private readonly EXPIRED = `${process.env.BACKEND_URL}/404`;
   constructor(
     @InjectModel('Affiliate')
     private readonly affiliateModel: Model<any>,
@@ -25,11 +17,8 @@ export class ShortnerService {
     private readonly urlHistoryModel: Model<UrlHistoryProps>,
     @InjectModel('TimeAnalytics')
     private readonly timeAnalyticsModel: Model<TimeAnalyticsProps>,
-    // @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
-  ) {
-    this.suiClient = new SuiClient({ url: getFullnodeUrl('testnet') });
-    this.keyPair = Ed25519Keypair.deriveKeypair(process.env.OWNER_MNEMONIC_KEY);
-  }
+    private readonly handleUserClicksOps: HandleUserClicksOps,
+  ) {}
 
   recordAnalytics = async (
     id: string,
@@ -61,11 +50,8 @@ export class ShortnerService {
     id: string,
     createShortUrlDto: CreateShortUrlDto,
   ): Promise<string> => {
-    console.log('createShortUrlDto--', createShortUrlDto);
     const { expirationTime = null, url, shortUrl } = createShortUrlDto;
     const shortAlias = shortUrl.split('/')[3];
-    console.log('------>', shortAlias);
-    // const shortUrl = `${this.DOMAIN}/${shortAlias}`;
     const newShortUrl = new this.urlHistoryModel({
       expirationTime,
       shortUrl,
@@ -78,69 +64,39 @@ export class ShortnerService {
     return shortUrl;
   };
 
-  // private createRedisCache = async (key: string, value: any): Promise<void> => {
-  //   await this.cacheManager.set(key, value, 300000);
-  // };
-
-  updateClickCount = ({
-    campaignInfoAddress,
-    campaignProfileAddress,
-    profileAddress,
-  }: any) => {
-    return new Promise<void>((resolve) => {
-      const txb = new TransactionBlock();
-      txb.moveCall({
-        arguments: [
-          txb.object(campaignInfoAddress),
-          txb.object(profileAddress),
-        ],
-        target: `${process.env.CAMPAIGN_PACKAGE_ID}::campaign_fund::mutate_affiliate_via_campaign`,
-      });
-      const promiseResponse = this.suiClient.signAndExecuteTransactionBlock({
-        transactionBlock: txb,
-        signer: this.keyPair,
-        requestType: 'WaitForLocalExecution',
-        options: {
-          showEffects: true,
-        },
-      });
-      resolve(promiseResponse as any);
-    });
-  };
-
   getShortURL = async (shortAlias: string, ref: string, userAgent: string) => {
-    const hasShortUrlDetails = await this.affiliateModel.findOne({
-      urlAlias: shortAlias,
-    });
+    try {
+      const hasShortUrlDetails = await this.affiliateModel.findOne({
+        urlAlias: shortAlias,
+      });
+      if (hasShortUrlDetails) {
+        const {
+          campaignInfoAddress,
+          campaignProfileAddress,
+          profileAddress,
+          originalUrl,
+          expirationTime = null,
+        } = hasShortUrlDetails as any;
 
-    const {
-      campaignInfoAddress,
-      // linkTxAddress,
-      campaignProfileAddress,
-      profileAddress,
-      originalUrl,
-      expirationTime = null,
-    } = hasShortUrlDetails as any;
+        if (originalUrl === this.EXPIRED) {
+          return this.noPageFound;
+        }
 
-    if (checkUrlExpiration(expirationTime)) {
-      return this.noPageFound;
+        if (checkUrlExpiration(expirationTime)) {
+          await this.handleUserClicksOps.updateClickExpire(campaignInfoAddress);
+          return this.noPageFound;
+        }
+
+        await this.handleUserClicksOps.updateClickCount({
+          campaignInfoAddress,
+          campaignProfileAddress,
+          profileAddress,
+        });
+
+        return originalUrl;
+      }
+    } catch (err) {
+      console.log('err-->', err);
     }
-    console.log(
-      '--->',
-      campaignInfoAddress,
-      '--->',
-      campaignProfileAddress,
-      '--->',
-      profileAddress,
-    );
-    const response = await this.updateClickCount({
-      campaignInfoAddress,
-      campaignProfileAddress,
-      profileAddress,
-    });
-
-    console.log('response--->', response);
-
-    return originalUrl;
   };
 }

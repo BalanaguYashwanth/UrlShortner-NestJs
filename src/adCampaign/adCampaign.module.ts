@@ -8,17 +8,10 @@ import {
   TimeAnalyticsSchema,
   UrlHistorySchema,
 } from 'src/shortner/shortner.model';
-import { CacheModule } from '@nestjs/cache-manager';
-import { redisStore } from 'cache-manager-redis-yet';
 
 @Module({
   imports: [
     ShortnerModule,
-    // CacheModule.register({
-    //   store: redisStore,
-    //   host: 'localhost',
-    //   port: 6379,
-    // }),
     MongooseModule.forFeature([
       {
         name: 'Campaign',

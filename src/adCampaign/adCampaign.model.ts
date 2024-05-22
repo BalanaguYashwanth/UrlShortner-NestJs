@@ -2,6 +2,9 @@ import mongoose from 'mongoose';
 
 export const AffiliateSchema = new mongoose.Schema(
   {
+    expirationTime: {
+      type: String,
+    },
     twitterProfile: {
       type: String,
     },
@@ -31,9 +34,6 @@ export const AffiliateSchema = new mongoose.Schema(
     campaignProfileAddress: {
       type: String,
     },
-    linkTxAddress: {
-      type: String,
-    },
     urlAlias: {
       type: String,
     },
@@ -60,10 +60,6 @@ export const CampaignSchema = new mongoose.Schema(
     originalUrl: {
       type: String,
       required: [true, 'Original URL is required'],
-    },
-    campaignUrl: {
-      type: String,
-      required: [true, 'Campaign URL is required'],
     },
     coinObjectAddress: {
       type: String,
@@ -100,6 +96,10 @@ export const CampaignSchema = new mongoose.Schema(
     campaignConfig: {
       type: String,
       required: [true, 'Campaign Config Address is required'],
+    },
+    status: {
+      type: Number,
+      default: 2,
     },
   },
   {
