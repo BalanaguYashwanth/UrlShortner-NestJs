@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ShortnerController } from './shortner.controller';
 import { ShortnerService } from './shortner.service';
@@ -9,10 +9,12 @@ import {
   CampaignSchema,
 } from 'src/adCampaign/adCampaign.model';
 import { HandleUserClicksOps } from './common/handleUserClicksOps.helpers';
+import { QueueModule } from 'src/queue/queue.module';
 
 @Module({
   imports: [
     AuthModule,
+    forwardRef(() => QueueModule),
     MongooseModule.forFeature([
       {
         name: 'Affiliate',

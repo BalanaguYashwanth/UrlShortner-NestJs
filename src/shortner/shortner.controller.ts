@@ -13,7 +13,13 @@ export class ShortnerController {
     @Res() res,
   ) {
     const userAgent = req.headers['user-agent'] || '';
-    const url = await this.shortnerService.getShortURL(id, ref, userAgent);
+    const ip =
+      req.headers['cf-connecting-ip'] ||
+      req.headers['x-real-ip'] ||
+      req.headers['x-forwarded-for'] ||
+      req.connection.remoteAddress ||
+      req.socket.remoteAddress;
+    const url = await this.shortnerService.getShortURL(id, ip, userAgent);
     if (url) {
       res.redirect(url);
     } else {

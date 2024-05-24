@@ -47,7 +47,10 @@ export class HandleUserClicksOps {
     return new Promise<void>((resolve) => {
       const txb = new TransactionBlock();
       txb.moveCall({
-        arguments: [txb.object(campaignInfoAddress)],
+        arguments: [
+          txb.object(process.env.CAMPAIGN_CONFIG),
+          txb.object(campaignInfoAddress),
+        ],
         target: `${process.env.CAMPAIGN_PACKAGE_ID}::campaign_fund::end_campaign`,
       });
       const promiseResponse = this.suiClient.signAndExecuteTransactionBlock({
@@ -62,11 +65,11 @@ export class HandleUserClicksOps {
     });
   };
 
-  updateClickExpire = async (campaignInfoAddress: string) => {
+  updateClickExpire = async (campaignInfoAddress: string, urlAlias: string) => {
     try {
       await this.endCampaign(campaignInfoAddress);
       await this.affiliateModel.updateOne(
-        { campaignInfoAddress },
+        { urlAlias },
         {
           $set: {
             originalUrl: `${process.env.BACKEND_URL}/404`,

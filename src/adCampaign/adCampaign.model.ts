@@ -37,6 +37,17 @@ export const AffiliateSchema = new mongoose.Schema(
     urlAlias: {
       type: String,
     },
+    validClicks: {
+      type: Number,
+      default: 0,
+    },
+    invalidClicks: {
+      type: Number,
+      default: 0,
+    },
+    totalIPAddress: {
+      type: Array,
+    },
   },
   {
     timestamps: true,

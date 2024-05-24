@@ -5,6 +5,7 @@ import { ShortnerModule } from './shortner/shortner.module';
 import { AuthModule } from './auth/auth.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { AdCampaignModule } from './adCampaign/adCampaign.module';
+import { QueueModule } from './queue/queue.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { AdCampaignModule } from './adCampaign/adCampaign.module';
     AuthModule,
     AnalyticsModule,
     ShortnerModule,
+    QueueModule,
   ],
   providers: [],
 })
