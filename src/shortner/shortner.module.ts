@@ -5,7 +5,6 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ShortnerController } from './shortner.controller';
 import { ShortnerService } from './shortner.service';
 import { TimeAnalyticsSchema, UrlHistorySchema } from './shortner.model';
-import { AuthModule } from 'src/auth/auth.module';
 import {
   AffiliateSchema,
   CampaignSchema,
@@ -15,7 +14,6 @@ import { QueueModule } from 'src/queue/queue.module';
 
 @Module({
   imports: [
-    AuthModule,
     forwardRef(() => QueueModule),
     MongooseModule.forFeature([
       {
