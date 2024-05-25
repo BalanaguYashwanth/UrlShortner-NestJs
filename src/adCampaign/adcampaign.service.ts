@@ -26,8 +26,7 @@ export class AdCampaignService {
   };
 
   createAffiliate = async (affiliateDto: AffiliateDto) => {
-    const { campaignInfoAddress, campaignUrl, twitterProfile, profileAddress } =
-      affiliateDto;
+    const { campaignInfoAddress, campaignUrl, profileAddress } = affiliateDto;
     try {
       let profileTxAddress = profileAddress;
 
@@ -36,7 +35,6 @@ export class AdCampaignService {
           (await new HandleAffiliateSUIOperations().createAffiliateProfile(
             campaignInfoAddress,
             campaignUrl,
-            twitterProfile,
           )) as any;
       } else {
         await new HandleAffiliateSUIOperations().updateAffiliateProfile(

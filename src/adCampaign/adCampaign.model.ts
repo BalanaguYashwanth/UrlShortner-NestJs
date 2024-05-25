@@ -5,9 +5,6 @@ export const AffiliateSchema = new mongoose.Schema(
     expirationTime: {
       type: String,
     },
-    twitterProfile: {
-      type: String,
-    },
     originalUrl: {
       type: String,
       required: [true, 'Original URL is required'],
@@ -56,10 +53,6 @@ export const AffiliateSchema = new mongoose.Schema(
 
 export const CampaignSchema = new mongoose.Schema(
   {
-    campaignName: {
-      type: String,
-      required: [true, 'Campaign Name is required'],
-    },
     companyName: {
       type: String,
       required: [true, 'Company Name is required'],

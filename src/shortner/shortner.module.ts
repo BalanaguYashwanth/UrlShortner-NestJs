@@ -1,3 +1,5 @@
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { Module, forwardRef } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ShortnerController } from './shortner.controller';
@@ -31,9 +33,22 @@ import { QueueModule } from 'src/queue/queue.module';
       },
       { name: 'TimeAnalytics', schema: TimeAnalyticsSchema },
     ]),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 1,
+        limit: 15,
+      },
+    ]),
   ],
   controllers: [ShortnerController],
-  providers: [ShortnerService, HandleUserClicksOps],
+  providers: [
+    ShortnerService,
+    HandleUserClicksOps,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
   exports: [ShortnerService],
 })
 export class ShortnerModule {}

@@ -18,7 +18,6 @@ export class CampaignDto {
 }
 
 export class AffiliateDto {
-  twitterProfile: string;
   originalUrl: string;
   campaignUrl: string;
   campaignInfoAddress: string;

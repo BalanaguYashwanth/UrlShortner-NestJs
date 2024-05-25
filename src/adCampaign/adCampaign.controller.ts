@@ -6,7 +6,7 @@ export class AdCampaignController {
   constructor(private readonly adCampaignService: AdCampaignService) {}
 
   @Get('status')
-  async status() {
+  status() {
     return { status: 'running' };
   }
 

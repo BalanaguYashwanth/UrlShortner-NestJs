@@ -1,4 +1,6 @@
 import { Module } from '@nestjs/common';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AffiliateSchema, CampaignSchema } from './adCampaign.model';
 import { AdCampaignController } from './adCampaign.controller';
@@ -30,8 +32,20 @@ import {
       },
       { name: 'TimeAnalytics', schema: TimeAnalyticsSchema },
     ]),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 1,
+        limit: 15,
+      },
+    ]),
   ],
   controllers: [AdCampaignController],
-  providers: [AdCampaignService],
+  providers: [
+    AdCampaignService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AdCampaignModule {}

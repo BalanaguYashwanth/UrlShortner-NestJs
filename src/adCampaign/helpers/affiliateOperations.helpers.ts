@@ -6,7 +6,7 @@ export class HandleAffiliateSUIOperations {
   private suiClient;
   private keyPair;
   constructor() {
-    this.suiClient = new SuiClient({ url: getFullnodeUrl('testnet') });
+    this.suiClient = new SuiClient({ url: getFullnodeUrl('mainnet') });
     this.keyPair = Ed25519Keypair.deriveKeypair(process.env.OWNER_MNEMONIC_KEY);
   }
 
@@ -43,7 +43,6 @@ export class HandleAffiliateSUIOperations {
   createAffiliateProfile = async (
     campaignInfoAddress: string,
     campaignUrl: string,
-    twitterProfile: string,
   ): Promise<any> => {
     return new Promise<void>(async (resolve) => {
       const txb = new TransactionBlock();
@@ -52,7 +51,6 @@ export class HandleAffiliateSUIOperations {
           txb.object(process.env.CAMPAIGN_CONFIG),
           txb.object(campaignInfoAddress),
           txb.pure.string(campaignUrl),
-          txb.pure.string(twitterProfile),
         ],
         target: `${process.env.CAMPAIGN_PACKAGE_ID}::campaign_fund::create_affiliate_profile`,
       });

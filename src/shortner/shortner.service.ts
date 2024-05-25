@@ -75,28 +75,32 @@ export class ShortnerService {
       campaignProfileAddress,
       profileAddress,
     } = hasShortUrlDetails;
-
-    if (totalIPAddress.includes(ip)) {
-      await this.affiliateModel.updateOne(
-        {
-          urlAlias,
-        },
-        { $inc: { invalidClicks: 1 } },
-        { new: true },
-      );
-    } else {
-      await this.handleUserClicksOps.updateClickCount({
-        campaignInfoAddress,
-        campaignProfileAddress,
-        profileAddress,
-      });
-      (await this.affiliateModel.findOneAndUpdate(
-        {
-          urlAlias,
-        },
-        { $addToSet: { totalIPAddress: ip }, $inc: { validClicks: 1 } },
-        { new: true },
-      )) as any;
+    try {
+      if (totalIPAddress.includes(ip)) {
+        await this.affiliateModel.updateOne(
+          {
+            urlAlias,
+          },
+          { $inc: { invalidClicks: 1 } },
+          { new: true },
+        );
+      } else {
+        await this.handleUserClicksOps.updateClickCount({
+          campaignInfoAddress,
+          campaignProfileAddress,
+          profileAddress,
+        });
+        (await this.affiliateModel.findOneAndUpdate(
+          {
+            urlAlias,
+          },
+          { $addToSet: { totalIPAddress: ip }, $inc: { validClicks: 1 } },
+          { new: true },
+        )) as any;
+      }
+      console.log('---recieved---');
+    } catch (err) {
+      console.log('err--->', err);
     }
   };
 
