@@ -25,6 +25,7 @@ export class QueueService implements OnModuleInit {
         secretAccessKey: process.env.AWS_SECRET_KEY_ID,
       },
     };
+    console.log('log--->', this.awsConfig);
     this.sqsClient = new SQSClient(this.awsConfig);
   }
 
