@@ -20,7 +20,7 @@ export class QueueService implements OnModuleInit {
   ) {
     this.awsConfig = {
       region: process.env.AWS_REGION,
-      credentails: {
+      credentials: {
         accessKeyId: process.env.AWS_ACCESS_KEY_ID,
         secretAccessKey: process.env.AWS_SECRET_KEY_ID,
       },
