@@ -24,3 +24,11 @@ export class AffiliateDto {
   walletAddress: string;
   profileAddress: string;
 }
+
+export class SupportersDto {
+ campaignConfig: string;
+ campaignInfoAddress: string;
+ message: string;
+ coins: string;
+ maxCoinValueAddress: string;
+}
