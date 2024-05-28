@@ -57,9 +57,18 @@ export const CampaignSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Company Name is required'],
     },
+    campaignName: {
+      type: String,
+    },
     category: {
       type: String,
       required: [true, 'Category is required'],
+    },
+    description: {
+      type: String,
+    },
+    banner: {
+      type: String,
     },
     originalUrl: {
       type: String,

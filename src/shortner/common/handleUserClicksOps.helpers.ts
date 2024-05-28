@@ -16,7 +16,7 @@ export class HandleUserClicksOps {
     @InjectModel('Campaign')
     private readonly campaignModel: Model<any>,
   ) {
-    this.suiClient = new SuiClient({ url: getFullnodeUrl('mainnet') });
+    this.suiClient = new SuiClient({ url: getFullnodeUrl('testnet') });
     this.keyPair = Ed25519Keypair.deriveKeypair(process.env.OWNER_MNEMONIC_KEY);
   }
 

@@ -6,7 +6,7 @@ export class HandleAffiliateSUIOperations {
   private suiClient;
   private keyPair;
   constructor() {
-    this.suiClient = new SuiClient({ url: getFullnodeUrl('mainnet') });
+    this.suiClient = new SuiClient({ url: getFullnodeUrl('testnet') });
     this.keyPair = Ed25519Keypair.deriveKeypair(process.env.OWNER_MNEMONIC_KEY);
   }
 
