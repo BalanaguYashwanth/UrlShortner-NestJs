@@ -67,7 +67,8 @@ export const transformAffiliateData = (affiliates) => {
     const { validClicks, invalidClicks, profileAddress } = affiliate;
     return {
       profileAddress,
-      totalClicks: validClicks + invalidClicks,
+      validClicks,
+      invalidClicks,
       earnings: 0,
     };
   });

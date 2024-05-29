@@ -114,6 +114,14 @@ export const CampaignSchema = new mongoose.Schema(
       type: Number,
       default: 2,
     },
+    validClicks: {
+      type: Number,
+      default: 0,
+    },
+    invalidClicks: {
+      type: Number,
+      default: 0,
+    },
   },
   {
     timestamps: true,

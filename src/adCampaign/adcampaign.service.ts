@@ -51,6 +51,7 @@ export class AdCampaignService {
   };
 
   createAffiliate = async (affiliateDto: AffiliateDto) => {
+    //todo - check endtime and allow this request
     const { campaignInfoAddress, campaignUrl, profileAddress, walletAddress } =
       affiliateDto;
     try {
@@ -122,6 +123,7 @@ export class AdCampaignService {
     return transformedData;
   };
 
+  //todo - add total clicks  = valid clicks + invalid clicks
   getAffiliateMetricsByID = async (campaignInfoAddress: string) => {
     const aggregateQuery = [
       {
@@ -131,10 +133,14 @@ export class AdCampaignService {
         $group: {
           _id: null,
           totalValidClicks: { $sum: '$validClicks' },
+          totalInValidClicks: { $sum: '$invalidClicks' },
         },
       },
     ];
     const response = await this.affiliateModel.aggregate(aggregateQuery);
-    return { totalClicks: response[0]?.totalValidClicks || 0 };
+    return {
+      totalClicks:
+        response[0]?.totalValidClicks + response[0]?.totalInValidClicks || 0,
+    };
   };
 }

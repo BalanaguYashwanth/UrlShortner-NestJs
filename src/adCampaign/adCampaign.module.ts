@@ -2,7 +2,11 @@ import { Module } from '@nestjs/common';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { MongooseModule } from '@nestjs/mongoose';
-import { AffiliateSchema, CampaignSchema ,SupportersSchema} from './adCampaign.model';
+import {
+  AffiliateSchema,
+  CampaignSchema,
+  SupportersSchema,
+} from './adCampaign.model';
 import { AdCampaignController } from './adCampaign.controller';
 import { AdCampaignService } from './adcampaign.service';
 import { ShortnerModule } from 'src/shortner/shortner.module';
@@ -24,9 +28,9 @@ import {
         schema: AffiliateSchema,
       },
       {
-        name:'Supporters',
-        schema:SupportersSchema,
-      }
+        name: 'Supporters',
+        schema: SupportersSchema,
+      },
     ]),
     MongooseModule.forFeature([
       {
