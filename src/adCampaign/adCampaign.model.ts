@@ -21,7 +21,7 @@ export const AffiliateSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Wallet address is required'],
     },
-    earnings: {
+    cpc: {
       type: Number,
       default: 0,
     },
@@ -120,26 +120,33 @@ export const CampaignSchema = new mongoose.Schema(
   },
 );
 
-export const SupportersSchema = new mongoose.Schema(
-  {
-    campaignConfig: {
-      type: String,
-      required: [true, 'Campaign Config is required'],  
-    },
-    campaignInfoAddress: {
-      type: String,
-      required: [true, 'Campaign Info Address is required'],
-    },
-    message: {
-      type: String,
-      required: [true, 'Message is required'],
-    },
-    coins: {
-      type: Number,
-      required: [true, 'Coins is required'],
-    },
-    maxCoinValueAddress: {
-      type: String,
-      required: [true, 'Max Coin Value Address is required'],
-    },
-  });
+export const SupportersSchema = new mongoose.Schema({
+  campaignConfig: {
+    type: String,
+    required: [true, 'Campaign Config is required'],
+  },
+  campaignInfoAddress: {
+    type: String,
+    required: [true, 'Campaign Info Address is required'],
+  },
+  message: {
+    type: String,
+    required: [true, 'Message is required'],
+  },
+  coins: {
+    type: Number,
+    required: [true, 'Coins is required'],
+  },
+  maxCoinValueAddress: {
+    type: String,
+    required: [true, 'Max Coin Value Address is required'],
+  },
+  walletAddress: {
+    type: String,
+    required: [true, 'Wallet address is requied'],
+  },
+  transactionDigest: {
+    type: String,
+    required: [true, 'Transaction Digest is requied'],
+  },
+});

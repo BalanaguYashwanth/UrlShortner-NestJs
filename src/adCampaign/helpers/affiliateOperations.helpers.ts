@@ -103,6 +103,7 @@ export const affiliateSaveIntoDB = async ({
 }) => {
   const { campaignUrl, campaignInfoAddress, originalUrl, walletAddress } =
     affiliateDto;
+  //todo - check is it working properly or not
   await new HandleAffiliateSUIOperations().createAffiliateCampaignProfile({
     campaignInfoAddress,
     campaignUrl,
@@ -125,4 +126,18 @@ export const affiliateSaveIntoDB = async ({
     affiliateResponse._id,
     createShortUrlDto,
   );
+};
+
+export const getAffiliateCampaignDetails = async ({
+  affiliateModel,
+  campaignInfoAddress,
+  profileAddress,
+  walletAddress,
+}) => {
+  const details = await affiliateModel.findOne({
+    campaignInfoAddress,
+    profileAddress,
+    walletAddress,
+  });
+  return details;
 };
