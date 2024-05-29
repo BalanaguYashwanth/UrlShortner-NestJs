@@ -20,7 +20,18 @@ export class CampaignDto {
 export class AffiliateDto {
   originalUrl: string;
   campaignUrl: string;
+  cpc: number;
   campaignInfoAddress: string;
   walletAddress: string;
   profileAddress: string;
+}
+
+export class SupportersDto {
+  campaignConfig: string;
+  campaignInfoAddress: string;
+  message: string;
+  coins: string;
+  maxCoinValueAddress: string;
+  walletAddress: string;
+  transactionDigest: string;
 }

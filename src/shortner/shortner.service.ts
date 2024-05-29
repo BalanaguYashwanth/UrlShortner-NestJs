@@ -14,6 +14,8 @@ export class ShortnerService {
   constructor(
     @InjectModel('Affiliate')
     private readonly affiliateModel: Model<any>,
+    @InjectModel('Campaign')
+    private readonly campaignModel: Model<any>,
     @InjectModel('UrlHistory')
     private readonly urlHistoryModel: Model<UrlHistoryProps>,
     @InjectModel('TimeAnalytics')
@@ -84,6 +86,13 @@ export class ShortnerService {
           { $inc: { invalidClicks: 1 } },
           { new: true },
         );
+        (await this.campaignModel.findOneAndUpdate(
+          {
+            campaignInfoAddress,
+          },
+          { $inc: { invalidClicks: 1 } },
+          { new: true },
+        )) as any;
       } else {
         await this.handleUserClicksOps.updateClickCount({
           campaignInfoAddress,
@@ -95,6 +104,14 @@ export class ShortnerService {
             urlAlias,
           },
           { $addToSet: { totalIPAddress: ip }, $inc: { validClicks: 1 } },
+          { new: true },
+        )) as any;
+
+        (await this.campaignModel.findOneAndUpdate(
+          {
+            campaignInfoAddress,
+          },
+          { $inc: { validClicks: 1 } },
           { new: true },
         )) as any;
       }

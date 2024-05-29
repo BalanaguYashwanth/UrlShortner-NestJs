@@ -61,3 +61,15 @@ export const mapUserAgentToDeviceInfo = (
 
   return { deviceType, osType, browserType };
 };
+
+export const transformAffiliateData = (affiliates) => {
+  return affiliates.map((affiliate: any) => {
+    const { validClicks, invalidClicks, profileAddress } = affiliate;
+    return {
+      profileAddress,
+      validClicks,
+      invalidClicks,
+      earnings: 0,
+    };
+  });
+};
