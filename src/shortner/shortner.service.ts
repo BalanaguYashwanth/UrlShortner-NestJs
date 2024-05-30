@@ -78,7 +78,9 @@ export class ShortnerService {
       profileAddress,
     } = hasShortUrlDetails;
     try {
+      console.log('ip--->', ip, 'total---->', totalIPAddress);
       if (totalIPAddress.includes(ip)) {
+        console.log('=====ip address alreasy existed=====');
         await this.affiliateModel.updateOne(
           {
             urlAlias,
@@ -94,12 +96,15 @@ export class ShortnerService {
           { new: true },
         )) as any;
       } else {
-        await this.handleUserClicksOps.updateClickCount({
+        console.log('=====ip address not not existed=====');
+        const responseSUI = await this.handleUserClicksOps.updateClickCount({
           campaignInfoAddress,
           campaignProfileAddress,
           profileAddress,
         });
-        (await this.affiliateModel.findOneAndUpdate(
+        console.log('------>', responseSUI);
+
+        const mongoresponse = (await this.affiliateModel.findOneAndUpdate(
           {
             urlAlias,
           },
@@ -107,14 +112,22 @@ export class ShortnerService {
           { new: true },
         )) as any;
 
-        (await this.campaignModel.findOneAndUpdate(
+        const campaignresponse = (await this.campaignModel.findOneAndUpdate(
           {
             campaignInfoAddress,
           },
           { $inc: { validClicks: 1 } },
           { new: true },
         )) as any;
+
+        console.log(
+          '======>',
+          mongoresponse,
+          'campaignresponse---->',
+          campaignresponse,
+        );
       }
+
       console.log('---recieved---');
     } catch (err) {
       console.log('err--->', err);
@@ -161,7 +174,8 @@ export class ShortnerService {
       ip,
     };
     const paramsStringify = JSON.stringify(params);
-    this.queueService.pushMessageToQueue(paramsStringify);
+    console.log('pushing messages to queue======>', paramsStringify);
+    await this.queueService.pushMessageToQueue(paramsStringify);
     return originalUrl;
   };
 
