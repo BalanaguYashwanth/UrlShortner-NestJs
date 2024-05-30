@@ -79,11 +79,11 @@ export const CampaignSchema = new mongoose.Schema(
       required: [true, 'Coin Object Address is required'],
     },
     cpc: {
-      type: String,
+      type: Number,
       required: [true, 'CPC is required'],
     },
     campaignBudget: {
-      type: String,
+      type: Number,
       required: [true, 'Campaign Budgetis required'],
     },
     startDate: {

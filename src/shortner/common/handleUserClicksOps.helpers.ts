@@ -20,8 +20,8 @@ export class HandleUserClicksOps {
     this.keyPair = Ed25519Keypair.deriveKeypair(process.env.OWNER_MNEMONIC_KEY);
   }
 
-  updateClickCount = ({ campaignInfoAddress, profileAddress }: any) => {
-    return new Promise<void>((resolve) => {
+  updateClickCount = async ({ campaignInfoAddress, profileAddress }: any) => {
+    try {
       const txb = new TransactionBlock();
       txb.moveCall({
         arguments: [
@@ -31,7 +31,8 @@ export class HandleUserClicksOps {
         ],
         target: `${process.env.CAMPAIGN_PACKAGE_ID}::campaign_fund::update_affiliate_via_campaign`,
       });
-      const promiseResponse = this.suiClient.signAndExecuteTransactionBlock({
+
+      await this.suiClient.signAndExecuteTransactionBlock({
         transactionBlock: txb,
         signer: this.keyPair,
         requestType: 'WaitForLocalExecution',
@@ -39,8 +40,12 @@ export class HandleUserClicksOps {
           showEffects: true,
         },
       });
-      resolve(promiseResponse as any);
-    });
+      // console.log('promiseResponse---->', promiseResponse);
+      // return promiseResponse;
+    } catch (error) {
+      console.log('error----updateClickCount------->', error);
+      throw error;
+    }
   };
 
   endCampaign = (campaignInfoAddress: string) => {

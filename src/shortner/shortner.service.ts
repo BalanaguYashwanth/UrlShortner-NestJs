@@ -95,14 +95,15 @@ export class ShortnerService {
           { $inc: { invalidClicks: 1 } },
           { new: true },
         )) as any;
+        console.log('====invalid==response=====processed=====');
       } else {
         console.log('=====ip address not not existed=====');
-        const responseSUI = await this.handleUserClicksOps.updateClickCount({
+        await this.handleUserClicksOps.updateClickCount({
           campaignInfoAddress,
           campaignProfileAddress,
           profileAddress,
         });
-        console.log('------>', responseSUI);
+        console.log('---responseSUI========>');
 
         const mongoresponse = (await this.affiliateModel.findOneAndUpdate(
           {
@@ -121,16 +122,18 @@ export class ShortnerService {
         )) as any;
 
         console.log(
-          '======>',
+          '====vlaid response=======>',
           mongoresponse,
           'campaignresponse---->',
           campaignresponse,
+          '-------------------------done----------------------',
         );
       }
 
       console.log('---recieved---');
-    } catch (err) {
-      console.log('err--->', err);
+    } catch (error) {
+      console.log('----main------err--->', error);
+      return error;
     }
   };
 

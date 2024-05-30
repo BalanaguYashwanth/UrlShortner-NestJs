@@ -30,6 +30,17 @@ export class AdCampaignService {
   };
 
   createSupporter = async (supportersDto: SupportersDto) => {
+    const { campaignInfoAddress, coins } = supportersDto;
+    await this.campaignModel.updateOne(
+      {
+        campaignInfoAddress,
+      },
+      {
+        $inc: {
+          campaignBudget: parseFloat(coins),
+        },
+      },
+    );
     await this.supportersModel.create({
       ...supportersDto,
     });

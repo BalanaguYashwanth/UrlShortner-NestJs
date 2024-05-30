@@ -34,9 +34,10 @@ export class QueueService implements OnModuleInit {
         MessageBody: body,
         QueueUrl: process.env.QUEUE_URL,
       });
-      await this.sqsClient.send(command);
+      const sqsResponse = await this.sqsClient.send(command);
+      console.log('=========sqsResponse========', sqsResponse);
     } catch (error) {
-      console.log('error--->', error);
+      console.log('===========sqsError==========', error);
     }
   };
 
@@ -86,8 +87,11 @@ export class QueueService implements OnModuleInit {
   }
 
   async handleMessage(message) {
+    console.log('-------message========', message);
     const { Body, MessageId } = message;
+    console.log('----sqs----received-----messageId----->', MessageId);
     if (!this.messageIdSet.has(MessageId)) {
+      console.log('-------------sqs-----------went-----------inside---');
       const { hasShortUrlDetails, ip } = JSON.parse(Body);
       this.shortnerService.recordAndUpdateShortURLMetrics({
         hasShortUrlDetails,
