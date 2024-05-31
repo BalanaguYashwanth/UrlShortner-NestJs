@@ -80,6 +80,7 @@ export class QueueService implements OnModuleInit {
       sqs: this.sqsClient,
       handleMessage: this.handleMessage.bind(this),
       messageAttributeNames: ['All'],
+      waitTimeSeconds: 20,
     });
     this.consumer.on('error', this.handleError.bind(this));
     this.consumer.on('processing_error', this.handleProcessingError.bind(this));
@@ -87,11 +88,8 @@ export class QueueService implements OnModuleInit {
   }
 
   async handleMessage(message) {
-    console.log('-------message========', message);
     const { Body, MessageId } = message;
-    console.log('----sqs----received-----messageId----->', MessageId);
     if (!this.messageIdSet.has(MessageId)) {
-      console.log('-------------sqs-----------went-----------inside---');
       const { hasShortUrlDetails, ip } = JSON.parse(Body);
       this.shortnerService.recordAndUpdateShortURLMetrics({
         hasShortUrlDetails,

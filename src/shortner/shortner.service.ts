@@ -78,9 +78,8 @@ export class ShortnerService {
       profileAddress,
     } = hasShortUrlDetails;
     try {
-      console.log('ip--->', ip, 'total---->', totalIPAddress);
       if (totalIPAddress.includes(ip)) {
-        console.log('=====ip address alreasy existed=====');
+        console.log('=====ip address already existed=====');
         await this.affiliateModel.updateOne(
           {
             urlAlias,
@@ -103,9 +102,8 @@ export class ShortnerService {
           campaignProfileAddress,
           profileAddress,
         });
-        console.log('---responseSUI========>');
 
-        const mongoresponse = (await this.affiliateModel.findOneAndUpdate(
+        (await this.affiliateModel.findOneAndUpdate(
           {
             urlAlias,
           },
@@ -113,23 +111,14 @@ export class ShortnerService {
           { new: true },
         )) as any;
 
-        const campaignresponse = (await this.campaignModel.findOneAndUpdate(
+        (await this.campaignModel.findOneAndUpdate(
           {
             campaignInfoAddress,
           },
           { $inc: { validClicks: 1 } },
           { new: true },
         )) as any;
-
-        console.log(
-          '====vlaid response=======>',
-          mongoresponse,
-          'campaignresponse---->',
-          campaignresponse,
-          '-------------------------done----------------------',
-        );
       }
-
       console.log('---recieved---');
     } catch (error) {
       console.log('----main------err--->', error);
@@ -168,7 +157,7 @@ export class ShortnerService {
     });
 
     if (urlExpired) {
-      return this.noPageFound;
+      return originalUrl;
     }
 
     //pushing metrics to queue to record
@@ -176,9 +165,10 @@ export class ShortnerService {
       hasShortUrlDetails,
       ip,
     };
-    const paramsStringify = JSON.stringify(params);
-    console.log('pushing messages to queue======>', paramsStringify);
-    await this.queueService.pushMessageToQueue(paramsStringify);
+    // const paramsStringify = JSON.stringify(params);
+    // console.log('pushing messages to queue======>', paramsStringify);
+    // await this.queueService.pushMessageToQueue(paramsStringify);
+    this.recordAndUpdateShortURLMetrics(params);
     return originalUrl;
   };
 
@@ -186,17 +176,13 @@ export class ShortnerService {
     originalUrl,
     expirationTime,
     campaignInfoAddress,
-    urlAlias,
   }: any) => {
     if (originalUrl === this.EXPIRED) {
       return true;
     }
 
     if (checkUrlExpiration(expirationTime)) {
-      await this.handleUserClicksOps.updateClickExpire(
-        campaignInfoAddress,
-        urlAlias,
-      );
+      await this.handleUserClicksOps.updateClickExpire(campaignInfoAddress);
       return true;
     }
   };

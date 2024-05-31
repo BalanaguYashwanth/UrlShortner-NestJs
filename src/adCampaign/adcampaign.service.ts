@@ -124,7 +124,7 @@ export class AdCampaignService {
       { campaignInfoAddress },
       {
         _id: 0,
-        profileAddress: 1,
+        walletAddress: 1,
         validClicks: 1,
         invalidClicks: 1,
       },

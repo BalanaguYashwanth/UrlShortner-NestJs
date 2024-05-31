@@ -48,8 +48,8 @@ export class HandleUserClicksOps {
     }
   };
 
-  endCampaign = (campaignInfoAddress: string) => {
-    return new Promise<void>((resolve) => {
+  endCampaign = async (campaignInfoAddress: string) => {
+    try {
       const txb = new TransactionBlock();
       txb.moveCall({
         arguments: [
@@ -58,7 +58,7 @@ export class HandleUserClicksOps {
         ],
         target: `${process.env.CAMPAIGN_PACKAGE_ID}::campaign_fund::end_campaign`,
       });
-      const promiseResponse = this.suiClient.signAndExecuteTransactionBlock({
+      await this.suiClient.signAndExecuteTransactionBlock({
         transactionBlock: txb,
         signer: this.keyPair,
         requestType: 'WaitForLocalExecution',
@@ -66,21 +66,14 @@ export class HandleUserClicksOps {
           showEffects: true,
         },
       });
-      resolve(promiseResponse as any);
-    });
+    } catch (err) {
+      console.log('error--->', err);
+    }
   };
 
-  updateClickExpire = async (campaignInfoAddress: string, urlAlias: string) => {
+  updateClickExpire = async (campaignInfoAddress: string) => {
     try {
       await this.endCampaign(campaignInfoAddress);
-      await this.affiliateModel.updateOne(
-        { urlAlias },
-        {
-          $set: {
-            originalUrl: `${process.env.BACKEND_URL}/404`,
-          },
-        },
-      );
       await this.campaignModel.updateOne(
         { campaignInfoAddress },
         {

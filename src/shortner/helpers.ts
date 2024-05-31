@@ -64,9 +64,9 @@ export const mapUserAgentToDeviceInfo = (
 
 export const transformAffiliateData = (affiliates) => {
   return affiliates.map((affiliate: any) => {
-    const { validClicks, invalidClicks, profileAddress } = affiliate;
+    const { validClicks, invalidClicks, walletAddress } = affiliate;
     return {
-      profileAddress,
+      walletAddress,
       validClicks,
       invalidClicks,
       earnings: 0,
