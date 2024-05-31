@@ -9,8 +9,6 @@ import { HandleUserClicksOps } from './common/handleUserClicksOps.helpers';
 
 @Injectable()
 export class ShortnerService {
-  private readonly noPageFound = null;
-  private readonly EXPIRED = `${process.env.BACKEND_URL}/404`;
   constructor(
     @InjectModel('Affiliate')
     private readonly affiliateModel: Model<any>,
@@ -168,19 +166,11 @@ export class ShortnerService {
     // const paramsStringify = JSON.stringify(params);
     // console.log('pushing messages to queue======>', paramsStringify);
     // await this.queueService.pushMessageToQueue(paramsStringify);
-    this.recordAndUpdateShortURLMetrics(params);
+    await this.recordAndUpdateShortURLMetrics(params);
     return originalUrl;
   };
 
-  checkIsUrlExpired = async ({
-    originalUrl,
-    expirationTime,
-    campaignInfoAddress,
-  }: any) => {
-    if (originalUrl === this.EXPIRED) {
-      return true;
-    }
-
+  checkIsUrlExpired = async ({ expirationTime, campaignInfoAddress }: any) => {
     if (checkUrlExpiration(expirationTime)) {
       await this.handleUserClicksOps.updateClickExpire(campaignInfoAddress);
       return true;

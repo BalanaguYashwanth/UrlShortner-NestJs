@@ -72,12 +72,12 @@ export class HandleUserClicksOps {
 
   updateClickExpire = async (campaignInfoAddress: string) => {
     try {
-      // const { status } = await this.campaignModel.findOne({
-      //   campaignInfoAddress,
-      // });
-      // if (status === 3) {
-      //   return true;
-      // }
+      const { status } = await this.campaignModel.findOne({
+        campaignInfoAddress,
+      });
+      if (status === 3) {
+        return true;
+      }
       await this.endCampaign(campaignInfoAddress);
       await this.campaignModel.updateOne(
         { campaignInfoAddress },
