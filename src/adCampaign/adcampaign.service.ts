@@ -103,10 +103,6 @@ export class AdCampaignService {
     }
   };
 
-  getCampaigns = async () => {
-    const response = await this.campaignModel.find({});
-    return response;
-  };
 
   getCampaignById = async (campaignInfoAddress: string) => {
     const response = await this.campaignModel.find({ campaignInfoAddress });
@@ -154,4 +150,35 @@ export class AdCampaignService {
         response[0]?.totalValidClicks + response[0]?.totalInValidClicks || 0,
     };
   };
+  
+  getCampaignsByPage = async (page: number, limit: number, category: string = '', sortBy: string = '')=> {
+    const skip = (page - 1) * limit;
+  
+    let sortQuery: any = { createdAt: -1 };
+    if (sortBy) {
+      if (sortBy === 'Rates Per Click') {
+        sortQuery = { cpc: -1 };
+      } else if (sortBy === 'Time Left') {
+        sortQuery = { endDate: 1 };
+      } else if (sortBy === 'Budget Left') {
+        sortQuery = { budget: -1 };
+      }
+    }
+  
+    let filterQuery: any = {};
+    if (category && category !== 'Others') {
+      filterQuery = { category };
+    } else if (category === 'Others') {
+      filterQuery = { category: { $nin: ['Defi', 'NFT', 'Social', 'Marketplace', 'Meme Coin', 'Dev Tooling', 'Wallets', 'DAO’s', 'Gaming', 'Bridge', 'DEX'] } };
+    }
+    const totalCampaigns = await this.campaignModel.countDocuments(filterQuery);
+    const totalPages = Math.ceil(totalCampaigns / limit);
+    const campaigns = await this.campaignModel
+      .find(filterQuery)
+      .sort(sortQuery)
+      .skip(skip)
+      .limit(limit);
+    return { campaigns, totalPages };
+  };
 }
+

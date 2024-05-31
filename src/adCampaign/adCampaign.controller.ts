@@ -12,8 +12,10 @@ export class AdCampaignController {
 
   ////////////campaigns//////////////////
   @Get('campaigns')
-  async campaigns() {
-    return await this.adCampaignService.getCampaigns();
+  async campaigns(@Req() req) {
+    const { page, limit, category, sortBy } = req.query;
+    const { campaigns, totalPages} = await this.adCampaignService.getCampaignsByPage(page, limit, category, sortBy);
+    return { campaigns, totalPages };
   }
 
   @Post('campaigns/id')
@@ -72,4 +74,6 @@ export class AdCampaignController {
     );
   }
   ////////////supporters//////////////////
+
+
 }
