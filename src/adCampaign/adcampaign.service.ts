@@ -103,7 +103,6 @@ export class AdCampaignService {
     }
   };
 
-
   getCampaignById = async (campaignInfoAddress: string) => {
     const response = await this.campaignModel.find({ campaignInfoAddress });
     return response;
