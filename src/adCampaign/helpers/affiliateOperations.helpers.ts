@@ -48,7 +48,6 @@ export class HandleAffiliateSUIOperations {
       const txb = new TransactionBlock();
       txb.moveCall({
         arguments: [
-          txb.object(process.env.CAMPAIGN_CONFIG),
           txb.object(campaignInfoAddress),
           txb.pure.string(campaignUrl),
         ],

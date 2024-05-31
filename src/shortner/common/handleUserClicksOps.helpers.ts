@@ -25,7 +25,6 @@ export class HandleUserClicksOps {
       const txb = new TransactionBlock();
       txb.moveCall({
         arguments: [
-          txb.object(process.env.CAMPAIGN_CONFIG),
           txb.object(campaignInfoAddress),
           txb.object(profileAddress),
         ],
@@ -73,6 +72,12 @@ export class HandleUserClicksOps {
 
   updateClickExpire = async (campaignInfoAddress: string) => {
     try {
+      // const { status } = await this.campaignModel.findOne({
+      //   campaignInfoAddress,
+      // });
+      // if (status === 3) {
+      //   return true;
+      // }
       await this.endCampaign(campaignInfoAddress);
       await this.campaignModel.updateOne(
         { campaignInfoAddress },
@@ -84,7 +89,7 @@ export class HandleUserClicksOps {
       );
     } catch (e) {
       console.log('e=====>', e);
-      return this.noPageFound;
+      return true;
     }
   };
 }
