@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Req } from '@nestjs/common';
+import { Controller, Get, Post, Req, HttpException } from '@nestjs/common';
 import { AdCampaignService } from './adcampaign.service';
 
 @Controller('ad')
@@ -14,7 +14,13 @@ export class AdCampaignController {
   @Get('campaigns')
   async campaigns(@Req() req) {
     const { page, limit, category, sortBy } = req.query;
-    const { campaigns, totalPages} = await this.adCampaignService.getCampaignsByPage(page, limit, category, sortBy);
+    const { campaigns, totalPages } =
+      await this.adCampaignService.getCampaignsByPage(
+        page,
+        limit,
+        category,
+        sortBy,
+      );
     return { campaigns, totalPages };
   }
 
@@ -34,8 +40,19 @@ export class AdCampaignController {
   ////////////affiliates//////////////////
   @Post('affiliate/create')
   async createAffiliate(@Req() req) {
-    const data = req.body;
-    return await this.adCampaignService.createAffiliate(data);
+    try {
+      const data = req.body;
+      await this.adCampaignService.createAffiliate(data);
+    } catch (err) {
+      throw new HttpException(
+        {
+          status: 400,
+          error: 'Unauthorized',
+          message: err.message,
+        },
+        400,
+      );
+    }
   }
 
   @Post('affiliate/profile')
@@ -74,6 +91,4 @@ export class AdCampaignController {
     );
   }
   ////////////supporters//////////////////
-
-
 }

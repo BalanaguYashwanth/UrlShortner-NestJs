@@ -17,7 +17,7 @@ export class HandleUserClicksOps {
     private readonly campaignModel: Model<any>,
   ) {
     // const RPC_ENV = process.env.RPC_ENV as any;
-    this.suiClient = new SuiClient({ url: getFullnodeUrl('mainnet') });
+    this.suiClient = new SuiClient({ url: getFullnodeUrl('testnet') });
     this.keyPair = Ed25519Keypair.deriveKeypair(process.env.OWNER_MNEMONIC_KEY);
   }
 
@@ -52,10 +52,7 @@ export class HandleUserClicksOps {
     try {
       const txb = new TransactionBlock();
       txb.moveCall({
-        arguments: [
-          txb.object(process.env.CAMPAIGN_CONFIG),
-          txb.object(campaignInfoAddress),
-        ],
+        arguments: [txb.object(campaignInfoAddress)],
         target: `${process.env.CAMPAIGN_PACKAGE_ID}::campaign_fund::end_campaign`,
       });
       await this.suiClient.signAndExecuteTransactionBlock({

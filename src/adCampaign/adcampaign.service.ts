@@ -1,3 +1,4 @@
+import * as moment from 'moment';
 import { Injectable } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
@@ -63,8 +64,19 @@ export class AdCampaignService {
 
   createAffiliate = async (affiliateDto: AffiliateDto) => {
     //todo - check endtime and allow this request
-    const { campaignInfoAddress, campaignUrl, profileAddress, walletAddress } =
-      affiliateDto;
+    const {
+      campaignInfoAddress,
+      campaignUrl,
+      profileAddress,
+      walletAddress,
+      expirationTime,
+    } = affiliateDto;
+    const currentTime = moment().unix();
+
+    if (currentTime > parseInt(expirationTime)) {
+      throw new Error('campaign already expired');
+    }
+
     try {
       const hasAffiliateExists = (await getAffiliateCampaignDetails({
         affiliateModel: this.affiliateModel,

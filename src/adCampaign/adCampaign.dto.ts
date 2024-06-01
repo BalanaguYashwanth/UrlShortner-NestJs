@@ -24,6 +24,7 @@ export class AffiliateDto {
   campaignInfoAddress: string;
   walletAddress: string;
   profileAddress: string;
+  expirationTime: string;
 }
 
 export class SupportersDto {

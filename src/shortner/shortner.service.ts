@@ -77,7 +77,6 @@ export class ShortnerService {
     } = hasShortUrlDetails;
     try {
       if (totalIPAddress.includes(ip)) {
-        console.log('=====ip address already existed=====');
         await this.affiliateModel.updateOne(
           {
             urlAlias,
@@ -94,7 +93,6 @@ export class ShortnerService {
         )) as any;
         console.log('====invalid==response=====processed=====');
       } else {
-        console.log('=====ip address not not existed=====');
         await this.handleUserClicksOps.updateClickCount({
           campaignInfoAddress,
           campaignProfileAddress,
@@ -119,7 +117,6 @@ export class ShortnerService {
       }
       console.log('---recieved---');
     } catch (error) {
-      console.log('----main------err--->', error);
       return error;
     }
   };
@@ -158,14 +155,10 @@ export class ShortnerService {
       return originalUrl;
     }
 
-    //pushing metrics to queue to record
     const params = {
       hasShortUrlDetails,
       ip,
     };
-    // const paramsStringify = JSON.stringify(params);
-    // console.log('pushing messages to queue======>', paramsStringify);
-    // await this.queueService.pushMessageToQueue(paramsStringify);
     await this.recordAndUpdateShortURLMetrics(params);
     return originalUrl;
   };
