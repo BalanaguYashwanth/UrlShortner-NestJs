@@ -7,7 +7,7 @@ export class HandleAffiliateSUIOperations {
   private keyPair;
   constructor() {
     // const RPC_ENV = process.env.RPC_ENV as any;
-    this.suiClient = new SuiClient({ url: getFullnodeUrl('testnet') });
+    this.suiClient = new SuiClient({ url: getFullnodeUrl('mainnet') });
     this.keyPair = Ed25519Keypair.deriveKeypair(process.env.OWNER_MNEMONIC_KEY);
   }
 
