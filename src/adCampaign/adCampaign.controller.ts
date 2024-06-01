@@ -42,7 +42,9 @@ export class AdCampaignController {
   async createAffiliate(@Req() req) {
     try {
       const data = req.body;
-      await this.adCampaignService.createAffiliate(data);
+      const { campaignUrl } =
+        await this.adCampaignService.createAffiliate(data);
+      return { campaignUrl };
     } catch (err) {
       throw new HttpException(
         {
