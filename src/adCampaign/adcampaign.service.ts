@@ -212,4 +212,13 @@ export class AdCampaignService {
       .limit(limit);
     return { campaigns, totalPages };
   };
+
+  splitCoinService = async (data) => {
+    try {
+      const address = await new HandleAffiliateSUIOperations().splitCoin(data);
+      return address;
+    } catch (err) {
+      return 'unable to split';
+    }
+  };
 }
