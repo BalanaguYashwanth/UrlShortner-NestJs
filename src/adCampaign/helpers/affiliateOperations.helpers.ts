@@ -7,7 +7,7 @@ export class HandleAffiliateSUIOperations {
   private keyPair;
   constructor() {
     // const RPC_ENV = process.env.RPC_ENV as any;
-    this.suiClient = new SuiClient({ url: getFullnodeUrl('testnet') });
+    this.suiClient = new SuiClient({ url: getFullnodeUrl('mainnet') });
     this.keyPair = Ed25519Keypair.deriveKeypair(process.env.OWNER_MNEMONIC_KEY);
   }
 
@@ -107,23 +107,18 @@ export class HandleAffiliateSUIOperations {
     }
   };
 
-  getMaxBalanceObjectAddress = (balanceArr: any[], budget) => {
+  getMaxBalanceObjectAddress = (balanceArr, budget) => {
     let coinAddress = '';
-    balanceArr.forEach(
-      ({
-        coinObjectId,
-        balance,
-      }: {
-        coinObjectId: string;
-        balance: string;
-      }) => {
-        console.log('balance---->', balance, 'budget-----', budget);
-        if (parseInt(balance) == parseInt(budget)) {
-          coinAddress = coinObjectId;
-          return;
-        }
-      },
-    );
+    const budgetInt = parseInt(budget);
+
+    for (let i = 0; i < balanceArr.length; i++) {
+      const { coinObjectId, balance } = balanceArr[i];
+      if (parseInt(balance) == budgetInt) {
+        coinAddress = coinObjectId;
+        break;
+      }
+    }
+
     return coinAddress;
   };
 
@@ -131,22 +126,20 @@ export class HandleAffiliateSUIOperations {
     try {
       const txb = new TransactionBlock();
       const [splittedCoin] = txb.splitCoins(txb.gas, [budget]);
-      console.log(
-        'splittedCoin-->',
-        splittedCoin,
-        'receiverAddress->',
-        receiverAddress,
-      );
       txb.transferObjects([splittedCoin, txb.gas], receiverAddress);
       await this.suiClient.signAndExecuteTransactionBlock({
         signer: this.keyPair,
         transactionBlock: txb,
       });
+      await new Promise((resolve) => setTimeout(resolve, 2000));
       const walletBalanceArr = await this.suiClient.getCoins({
         owner: receiverAddress,
       });
-      console.log('walletBalanceArr--->', walletBalanceArr);
-      const address = this.getMaxBalanceObjectAddress(walletBalanceArr, budget);
+
+      const address = this.getMaxBalanceObjectAddress(
+        walletBalanceArr?.data,
+        budget,
+      );
       return address;
     } catch (err) {
       throw new Error(err);

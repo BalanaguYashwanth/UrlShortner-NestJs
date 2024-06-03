@@ -14,10 +14,11 @@ export class AdCampaignController {
   async handleSplitCoin(@Req() req) {
     try {
       const { budget, receiverAddress } = req.body;
-      const address = this.adCampaignService.splitCoinService({
+      const address = await this.adCampaignService.splitCoinService({
         budget,
         receiverAddress,
       });
+
       return { address };
     } catch (err) {
       throw new HttpException(
