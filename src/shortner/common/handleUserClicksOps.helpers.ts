@@ -32,7 +32,7 @@ export class HandleUserClicksOps {
         target: `${process.env.CAMPAIGN_PACKAGE_ID}::campaign_fund::update_affiliate_via_campaign`,
       });
 
-      await this.suiClient.signAndExecuteTransactionBlock({
+      const txResponse = await this.suiClient.signAndExecuteTransactionBlock({
         transactionBlock: txb,
         signer: this.keyPair,
         requestType: 'WaitForLocalExecution',
@@ -40,10 +40,9 @@ export class HandleUserClicksOps {
           showEffects: true,
         },
       });
-      // console.log('promiseResponse---->', promiseResponse);
-      // return promiseResponse;
+      await txResponse;
     } catch (error) {
-      console.log('error----updateClickCount------->', error);
+      console.log('---error----updateClickCount------->', error);
       throw error;
     }
   };
@@ -55,7 +54,7 @@ export class HandleUserClicksOps {
         arguments: [txb.object(campaignInfoAddress)],
         target: `${process.env.CAMPAIGN_PACKAGE_ID}::campaign_fund::end_campaign`,
       });
-      await this.suiClient.signAndExecuteTransactionBlock({
+      const txResponse = await this.suiClient.signAndExecuteTransactionBlock({
         transactionBlock: txb,
         signer: this.keyPair,
         requestType: 'WaitForLocalExecution',
@@ -63,6 +62,7 @@ export class HandleUserClicksOps {
           showEffects: true,
         },
       });
+      await txResponse;
     } catch (err) {
       console.log('error--->', err);
     }

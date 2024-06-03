@@ -42,14 +42,13 @@ export class AdCampaignController {
   async createAffiliate(@Req() req) {
     try {
       const data = req.body;
-      const { campaignUrl } =
-        await this.adCampaignService.createAffiliate(data);
-      return { campaignUrl };
+      const responseData = await this.adCampaignService.createAffiliate(data);
+      return { campaignUrl: responseData?.campaignUrl };
     } catch (err) {
       throw new HttpException(
         {
           status: 400,
-          error: 'Unauthorized',
+          error: 'bad request',
           message: err.message,
         },
         400,

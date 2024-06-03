@@ -11,13 +11,13 @@ export class HandleAffiliateSUIOperations {
     this.keyPair = Ed25519Keypair.deriveKeypair(process.env.OWNER_MNEMONIC_KEY);
   }
 
-  createAffiliateCampaignProfile = ({
+  createAffiliateCampaignProfile = async ({
     campaignInfoAddress,
     campaignUrl,
     profileAddress,
     walletAddress,
-  }: any): any => {
-    return new Promise((resolve) => {
+  }: any) => {
+    try {
       const txb = new TransactionBlock();
       txb.moveCall({
         arguments: [
@@ -29,23 +29,28 @@ export class HandleAffiliateSUIOperations {
         target: `${process.env.CAMPAIGN_PACKAGE_ID}::campaign_fund::create_affiliate_campaign`,
       });
 
-      const promiseResponse = this.suiClient.signAndExecuteTransactionBlock({
-        transactionBlock: txb,
-        signer: this.keyPair,
-        requestType: 'WaitForLocalExecution',
-        options: {
-          showEffects: true,
-        },
-      });
-      resolve(promiseResponse);
-    });
+      const promiseResponse =
+        await this.suiClient.signAndExecuteTransactionBlock({
+          transactionBlock: txb,
+          signer: this.keyPair,
+          requestType: 'WaitForLocalExecution',
+          options: {
+            showEffects: true,
+          },
+        });
+      await promiseResponse;
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+    } catch (err) {
+      console.log('-----createAffiliateCampaignProfile---err--->', err);
+      throw new Error(err);
+    }
   };
 
   createAffiliateProfile = async (
     campaignInfoAddress: string,
     campaignUrl: string,
-  ): Promise<any> => {
-    return new Promise<void>(async (resolve) => {
+  ) => {
+    try {
       const txb = new TransactionBlock();
       txb.moveCall({
         arguments: [
@@ -54,7 +59,7 @@ export class HandleAffiliateSUIOperations {
         ],
         target: `${process.env.CAMPAIGN_PACKAGE_ID}::campaign_fund::create_affiliate_profile`,
       });
-      const txResponse = this.suiClient.signAndExecuteTransactionBlock({
+      const txResponse = await this.suiClient.signAndExecuteTransactionBlock({
         transactionBlock: txb,
         signer: this.keyPair,
         requestType: 'WaitForLocalExecution',
@@ -63,16 +68,20 @@ export class HandleAffiliateSUIOperations {
         },
       });
       const tx = await txResponse;
-      resolve(tx?.effects?.created[0]?.reference?.objectId as any);
-    });
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      return tx?.effects?.created[0]?.reference?.objectId;
+    } catch (error) {
+      console.log('----create-affiliate-profile---', error);
+      throw error;
+    }
   };
 
-  updateAffiliateProfile = (
+  updateAffiliateProfile = async (
     campaignInfoAddress: string,
     campaignUrl: string,
     profileAddress: string,
   ) => {
-    return new Promise<void>((resolve) => {
+    try {
       const txb = new TransactionBlock();
       txb.moveCall({
         arguments: [
@@ -82,7 +91,7 @@ export class HandleAffiliateSUIOperations {
         ],
         target: `${process.env.CAMPAIGN_PACKAGE_ID}::campaign_fund::update_affiliate_profile`,
       });
-      const promiseResponse = this.suiClient.signAndExecuteTransactionBlock({
+      const txResponse = await this.suiClient.signAndExecuteTransactionBlock({
         transactionBlock: txb,
         signer: this.keyPair,
         requestType: 'WaitForLocalExecution',
@@ -90,8 +99,12 @@ export class HandleAffiliateSUIOperations {
           showEffects: true,
         },
       });
-      resolve(promiseResponse as any);
-    });
+      const tx = await txResponse;
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      console.log('updateAffiliateProfile---tx--->', tx);
+    } catch (err) {
+      throw new Error(err);
+    }
   };
 }
 

@@ -114,6 +114,7 @@ export class AdCampaignService {
       return { campaignUrl: affiliateDto.campaignUrl };
     } catch (err) {
       console.log('err--->', err);
+      throw new Error(err);
     }
   };
 
