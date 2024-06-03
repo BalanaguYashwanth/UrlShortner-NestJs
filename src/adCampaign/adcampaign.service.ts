@@ -103,7 +103,7 @@ export class AdCampaignService {
           profileAddress,
         );
       }
-      console.log('profileAddress--after-->', profileAddress);
+      console.log('profileAddress--after-->', profileTxAddress);
       await affiliateSaveIntoDB({
         affiliateModel: this.affiliateModel,
         affiliateDto,
