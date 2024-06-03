@@ -10,6 +10,28 @@ export class AdCampaignController {
     return { status: 'running' };
   }
 
+  @Post('split-coin')
+  async handleSplitCoin(@Req() req) {
+    try {
+      const { budget, receiverAddress } = req.body;
+      const address = await this.adCampaignService.splitCoinService({
+        budget,
+        receiverAddress,
+      });
+
+      return { address };
+    } catch (err) {
+      throw new HttpException(
+        {
+          status: 400,
+          error: 'bad request',
+          message: err.message,
+        },
+        400,
+      );
+    }
+  }
+
   ////////////campaigns//////////////////
   @Get('campaigns')
   async campaigns(@Req() req) {

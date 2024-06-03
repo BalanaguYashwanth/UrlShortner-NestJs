@@ -106,6 +106,45 @@ export class HandleAffiliateSUIOperations {
       throw new Error(err);
     }
   };
+
+  getMaxBalanceObjectAddress = (balanceArr, budget) => {
+    let coinAddress = '';
+    const budgetInt = parseInt(budget);
+
+    for (let i = 0; i < balanceArr.length; i++) {
+      const { coinObjectId, balance } = balanceArr[i];
+      if (parseInt(balance) == budgetInt) {
+        coinAddress = coinObjectId;
+        break;
+      }
+    }
+
+    return coinAddress;
+  };
+
+  splitCoin = async ({ budget, receiverAddress }) => {
+    try {
+      const txb = new TransactionBlock();
+      const [splittedCoin] = txb.splitCoins(txb.gas, [budget]);
+      txb.transferObjects([splittedCoin, txb.gas], receiverAddress);
+      await this.suiClient.signAndExecuteTransactionBlock({
+        signer: this.keyPair,
+        transactionBlock: txb,
+      });
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      const walletBalanceArr = await this.suiClient.getCoins({
+        owner: receiverAddress,
+      });
+
+      const address = this.getMaxBalanceObjectAddress(
+        walletBalanceArr?.data,
+        budget,
+      );
+      return address;
+    } catch (err) {
+      throw new Error(err);
+    }
+  };
 }
 
 export const affiliateSaveIntoDB = async ({
