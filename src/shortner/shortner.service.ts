@@ -128,7 +128,7 @@ export class ShortnerService {
         urlAlias,
       });
       if (hasShortUrlDetails) {
-        const url = this.processMetrics({ hasShortUrlDetails, ip });
+        const url = await this.processMetrics({ hasShortUrlDetails, ip });
         return url;
       }
     } catch (err) {
@@ -159,6 +159,7 @@ export class ShortnerService {
       hasShortUrlDetails,
       ip,
     };
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     await this.recordAndUpdateShortURLMetrics(params);
     return originalUrl;
   };

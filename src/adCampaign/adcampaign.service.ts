@@ -89,6 +89,7 @@ export class AdCampaignService {
       }
 
       let profileTxAddress = profileAddress;
+      console.log('profileTxAddress---before-->', profileTxAddress);
       if (!profileTxAddress) {
         profileTxAddress =
           (await new HandleAffiliateSUIOperations().createAffiliateProfile(
@@ -102,16 +103,18 @@ export class AdCampaignService {
           profileAddress,
         );
       }
+      console.log('profileAddress--after-->', profileTxAddress);
       await affiliateSaveIntoDB({
         affiliateModel: this.affiliateModel,
         affiliateDto,
         profileTxAddress,
         shortnerService: this.shortnerService,
       });
-
+      console.log('---------result-------');
       return { campaignUrl: affiliateDto.campaignUrl };
     } catch (err) {
       console.log('err--->', err);
+      throw new Error(err);
     }
   };
 
