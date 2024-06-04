@@ -1,21 +1,29 @@
-import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { Module, forwardRef } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { CacheModule } from '@nestjs/cache-manager';
-import { redisStore } from 'cache-manager-redis-yet';
 import { ShortnerController } from './shortner.controller';
 import { ShortnerService } from './shortner.service';
 import { TimeAnalyticsSchema, UrlHistorySchema } from './shortner.model';
-import { AuthModule } from 'src/auth/auth.module';
+import {
+  AffiliateSchema,
+  CampaignSchema,
+} from 'src/adCampaign/adCampaign.model';
+import { HandleUserClicksOps } from './common/handleUserClicksOps.helpers';
+import { QueueModule } from 'src/queue/queue.module';
 
 @Module({
   imports: [
-    AuthModule,
-    CacheModule.register({
-      store: redisStore,
-      host: 'localhost',
-      port: 6379,
-    }),
+    forwardRef(() => QueueModule),
     MongooseModule.forFeature([
+      {
+        name: 'Affiliate',
+        schema: AffiliateSchema,
+      },
+      {
+        name: 'Campaign',
+        schema: CampaignSchema,
+      },
       {
         name: 'UrlHistory',
         schema: UrlHistorySchema,
@@ -23,8 +31,22 @@ import { AuthModule } from 'src/auth/auth.module';
       },
       { name: 'TimeAnalytics', schema: TimeAnalyticsSchema },
     ]),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 1,
+        limit: 15,
+      },
+    ]),
   ],
   controllers: [ShortnerController],
-  providers: [ShortnerService],
+  providers: [
+    ShortnerService,
+    HandleUserClicksOps,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
+  exports: [ShortnerService],
 })
 export class ShortnerModule {}

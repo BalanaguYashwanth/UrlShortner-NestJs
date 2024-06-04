@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
+// import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { ShortnerService } from '../shortner.service';
 import { TimeAnalyticsProps, UrlHistoryProps } from '../shortner.model';
 import { Model } from 'mongoose';
@@ -28,13 +28,13 @@ describe('ShortnerService', () => {
             create: jest.fn(),
           },
         },
-        {
-          provide: CACHE_MANAGER,
-          useValue: {
-            get: jest.fn(),
-            set: jest.fn(),
-          },
-        },
+        // {
+        //   provide: CACHE_MANAGER,
+        //   useValue: {
+        //     get: jest.fn(),
+        //     set: jest.fn(),
+        //   },
+        // },
       ],
     }).compile();
 
@@ -64,11 +64,11 @@ describe('ShortnerService', () => {
         browserType: 'Chrome',
       };
 
-      jest.spyOn(timeAnalyticsModelMock, 'create').mockResolvedValueOnce();
+      // jest.spyOn(timeAnalyticsModelMock, 'create').mockResolvedValueOnce();
       jest
         .spyOn(service as any, 'mapUserAgentToDeviceInfo')
         .mockReturnValueOnce(expectedDeviceInfo);
-      jest.spyOn(urlHistoryModelMock, 'updateOne').mockResolvedValueOnce();
+      // jest.spyOn(urlHistoryModelMock, 'updateOne').mockResolvedValueOnce();
 
       await service.recordAnalytics(id, ref, shortUrl, userAgent);
 

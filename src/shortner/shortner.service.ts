@@ -1,27 +1,26 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
 import { Model } from 'mongoose';
-import { CreateShortUrlDto } from './shortner.dto';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
 import { TimeAnalyticsProps, UrlHistoryProps } from './shortner.model';
-import {
-  checkUrlExpiration,
-  generateRandomAlphaNumeric,
-  mapUserAgentToDeviceInfo,
-} from './helpers';
+import { QueueService } from 'src/queue/queue.service';
+import { CreateShortUrlDto } from './shortner.dto';
+import { checkUrlExpiration, mapUserAgentToDeviceInfo } from './helpers';
+import { HandleUserClicksOps } from './common/handleUserClicksOps.helpers';
 
 @Injectable()
 export class ShortnerService {
-  private readonly DOMAIN = process.env.DOMAIN || 'http://localhost:3000';
-  private readonly noPageFound = null;
-
   constructor(
+    @InjectModel('Affiliate')
+    private readonly affiliateModel: Model<any>,
+    @InjectModel('Campaign')
+    private readonly campaignModel: Model<any>,
     @InjectModel('UrlHistory')
     private readonly urlHistoryModel: Model<UrlHistoryProps>,
     @InjectModel('TimeAnalytics')
     private readonly timeAnalyticsModel: Model<TimeAnalyticsProps>,
-    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
+    private readonly handleUserClicksOps: HandleUserClicksOps,
+    @Inject(forwardRef(() => QueueService))
+    private readonly queueService: QueueService,
   ) {}
 
   recordAnalytics = async (
@@ -54,14 +53,12 @@ export class ShortnerService {
     id: string,
     createShortUrlDto: CreateShortUrlDto,
   ): Promise<string> => {
-    const { expirationTime = null, url } = createShortUrlDto;
-    const shortAlias = generateRandomAlphaNumeric();
-    const shortUrl = `${this.DOMAIN}/${shortAlias}`;
-
+    const { expirationTime = null, url, shortUrl } = createShortUrlDto;
+    const shortAlias = shortUrl.split('/')[3];
     const newShortUrl = new this.urlHistoryModel({
       expirationTime,
-      shortAlias,
       shortUrl,
+      shortAlias,
       url,
       userId: id,
     });
@@ -70,30 +67,107 @@ export class ShortnerService {
     return shortUrl;
   };
 
-  private createRedisCache = async (key: string, value: any): Promise<void> => {
-    await this.cacheManager.set(key, value, 300000);
+  recordAndUpdateShortURLMetrics = async ({ hasShortUrlDetails, ip }) => {
+    const {
+      totalIPAddress,
+      urlAlias,
+      campaignInfoAddress,
+      campaignProfileAddress,
+      profileAddress,
+    } = hasShortUrlDetails;
+    try {
+      if (totalIPAddress.includes(ip)) {
+        await this.affiliateModel.updateOne(
+          {
+            urlAlias,
+          },
+          { $inc: { invalidClicks: 1 } },
+          { new: true },
+        );
+        (await this.campaignModel.findOneAndUpdate(
+          {
+            campaignInfoAddress,
+          },
+          { $inc: { invalidClicks: 1 } },
+          { new: true },
+        )) as any;
+        console.log('====invalid==response=====processed=====');
+      } else {
+        await this.handleUserClicksOps.updateClickCount({
+          campaignInfoAddress,
+          campaignProfileAddress,
+          profileAddress,
+        });
+
+        (await this.affiliateModel.findOneAndUpdate(
+          {
+            urlAlias,
+          },
+          { $addToSet: { totalIPAddress: ip }, $inc: { validClicks: 1 } },
+          { new: true },
+        )) as any;
+
+        (await this.campaignModel.findOneAndUpdate(
+          {
+            campaignInfoAddress,
+          },
+          { $inc: { validClicks: 1 } },
+          { new: true },
+        )) as any;
+      }
+      console.log('---recieved---');
+    } catch (error) {
+      return error;
+    }
   };
 
-  getShortURL = async (shortAlias: string, ref: string, userAgent: string) => {
-    let hasShortUrlDetails = await this.cacheManager.get(shortAlias);
+  getShortURL = async (urlAlias: string, ip: string, userAgent: string) => {
+    try {
+      //todo - implement the redis cache, so db calls will be reduce and price also reduce.
+      const hasShortUrlDetails = await this.affiliateModel.findOne({
+        urlAlias,
+      });
+      if (hasShortUrlDetails) {
+        const url = await this.processMetrics({ hasShortUrlDetails, ip });
+        return url;
+      }
+    } catch (err) {
+      console.log('err-->', err);
+    }
+  };
 
-    if (!hasShortUrlDetails) {
-      hasShortUrlDetails = await this.urlHistoryModel.findOne({ shortAlias });
+  processMetrics = async ({ hasShortUrlDetails, ip }: any) => {
+    const {
+      campaignInfoAddress,
+      originalUrl,
+      expirationTime = null,
+      urlAlias,
+    } = hasShortUrlDetails as any;
+
+    const urlExpired = await this.checkIsUrlExpired({
+      originalUrl,
+      expirationTime,
+      campaignInfoAddress,
+      urlAlias,
+    });
+
+    if (urlExpired) {
+      return originalUrl;
     }
 
-    if (!hasShortUrlDetails || hasShortUrlDetails === 404) {
-      await this.createRedisCache(shortAlias, 404);
-      return this.noPageFound;
-    }
+    const params = {
+      hasShortUrlDetails,
+      ip,
+    };
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await this.recordAndUpdateShortURLMetrics(params);
+    return originalUrl;
+  };
 
-    await this.createRedisCache(shortAlias, hasShortUrlDetails);
-    const { _id, expirationTime, shortUrl, url } = hasShortUrlDetails as any;
-    this.recordAnalytics(_id, ref, shortUrl, userAgent);
-
+  checkIsUrlExpired = async ({ expirationTime, campaignInfoAddress }: any) => {
     if (checkUrlExpiration(expirationTime)) {
-      return this.noPageFound;
+      await this.handleUserClicksOps.updateClickExpire(campaignInfoAddress);
+      return true;
     }
-
-    return url;
   };
 }
