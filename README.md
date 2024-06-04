@@ -9,7 +9,7 @@
 
 ✅ Implemented URL shortening algorithms to optimise storage and retrieval efficiency.
 
-✅ Implemented realtime distributing funds to affiliates.
+✅ Integrated SUI smart contract for distributing funds to affiliates in realtime across borders.
 
 ✅ Developed a system to handle URL expirations and auto-deletion after a certain period.
 
