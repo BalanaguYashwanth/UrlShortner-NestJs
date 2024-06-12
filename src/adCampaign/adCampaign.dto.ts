@@ -13,8 +13,11 @@ export class CampaignDto {
   endDate: string;
   campaignWalletAddress: string;
   campaignInfoAddress: string;
+  companyXProfile: string;
   packageAddress: string;
   status: string;
+  likes:[string];
+  dislikes:[string];  
 }
 
 export class AffiliateDto {
@@ -35,4 +38,10 @@ export class SupportersDto {
   maxCoinValueAddress: string;
   walletAddress: string;
   transactionDigest: string;
+}
+
+export class UpdateLikeDto {
+  campaignId: string;
+  userId: string;
+  type: string;
 }

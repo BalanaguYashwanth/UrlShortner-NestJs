@@ -102,6 +102,10 @@ export const CampaignSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Campaign Info Address is required'],
     },
+    companyXProfile:{
+      type: String,
+      required: [false],
+    },
     packageAddress: {
       type: String,
       required: [true, 'Package Address is required'],
@@ -121,6 +125,14 @@ export const CampaignSchema = new mongoose.Schema(
     invalidClicks: {
       type: Number,
       default: 0,
+    },
+    likes: {
+      type: [String], 
+      default: [],
+    },
+    dislikes: {
+      type: [String],
+      default: [],
     },
   },
   {

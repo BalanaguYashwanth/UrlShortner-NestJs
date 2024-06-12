@@ -2,7 +2,8 @@ import * as moment from 'moment';
 import { Injectable } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
-import { AffiliateDto, CampaignDto, SupportersDto } from './adCampaign.dto';
+import { AffiliateDto, CampaignDto, SupportersDto,UpdateLikeDto } from './adCampaign.dto';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { ShortnerService } from 'src/shortner/shortner.service';
 import {
   affiliateSaveIntoDB,
@@ -202,6 +203,7 @@ export class AdCampaignService {
             'Gaming',
             'Bridge',
             'DEX',
+            'SUI Overflow',
           ],
         },
       };
@@ -224,4 +226,38 @@ export class AdCampaignService {
       return 'unable to split';
     }
   };
+
+  async updateLike(updateLikeDto: UpdateLikeDto) {
+    const { campaignId, userId, type } = updateLikeDto;
+
+    const campaign = await this.campaignModel.findOne({ campaignInfoAddress: campaignId });
+    if (!campaign) {
+      throw new NotFoundException('Campaign not found');
+    }
+    if (type === 'like') {
+      if (campaign.likes.includes(userId)) {
+          campaign.likes = campaign.likes.filter(id => id !== userId);
+      } else {
+          campaign.dislikes = campaign.dislikes.filter(id => id !== userId);
+          if (!campaign.dislikes.includes(userId)) {
+              campaign.likes.push(userId);
+          }
+      }
+  } else if (type === 'dislike') {
+      if (campaign.dislikes.includes(userId)) {
+          campaign.dislikes = campaign.dislikes.filter(id => id !== userId);
+      } else {
+          campaign.likes = campaign.likes.filter(id => id !== userId);
+          if (!campaign.likes.includes(userId)) {
+              campaign.dislikes.push(userId);
+          }
+      }
+  } else {
+      throw new BadRequestException('Invalid type');
+  }
+
+    await campaign.save();
+    return { likes: campaign?.likes?.length, dislikes: campaign?.dislikes?.length};
+  }
 }
+ 
