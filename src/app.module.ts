@@ -4,7 +4,6 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ShortnerModule } from './shortner/shortner.module';
 import { AdCampaignModule } from './adCampaign/adCampaign.module';
 import { QueueModule } from './queue/queue.module';
-import { SearchBotModule } from './searchBot/searchBot.module';
 
 @Module({
   imports: [
@@ -13,7 +12,6 @@ import { SearchBotModule } from './searchBot/searchBot.module';
     AdCampaignModule,
     ShortnerModule,
     QueueModule,
-    SearchBotModule,
   ],
   providers: [],
 })
