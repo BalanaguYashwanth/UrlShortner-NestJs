@@ -14,6 +14,7 @@ export class CampaignDto {
   campaignWalletAddress: string;
   campaignInfoAddress: string;
   companyXProfile: string;
+  campaignvideolink: string;
   packageAddress: string;
   status: string;
   likes:[string];
