@@ -106,6 +106,10 @@ export const CampaignSchema = new mongoose.Schema(
       type: String,
       required: [false],
     },
+    campaignvideolink: {
+      type: String,
+      required: [false],
+    },
     packageAddress: {
       type: String,
       required: [true, 'Package Address is required'],
