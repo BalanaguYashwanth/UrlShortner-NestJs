@@ -74,13 +74,8 @@ export class AdCampaignService {
 
   createAffiliate = async (affiliateDto: AffiliateDto) => {
     //todo - check endtime and allow this request
-    const {
-      campaignInfoAddress,
-      campaignUrl,
-      profileAddress,
-      walletAddress,
-      expirationTime,
-    } = affiliateDto;
+    const { walletAddress, campaignWalletAddress, expirationTime } =
+      affiliateDto;
     const currentTime = moment().unix();
 
     if (currentTime > parseInt(expirationTime)) {
@@ -90,34 +85,18 @@ export class AdCampaignService {
     try {
       const hasAffiliateExists = (await getAffiliateCampaignDetails({
         affiliateModel: this.affiliateModel,
-        campaignInfoAddress,
-        profileAddress,
+        campaignWalletAddress,
         walletAddress,
       })) as any;
       if (hasAffiliateExists) {
         return { campaignUrl: hasAffiliateExists.campaignUrl };
       }
 
-      let profileTxAddress = profileAddress;
-
-      if (!profileTxAddress) {
-        profileTxAddress =
-          (await new HandleAffiliateSUIOperations().createAffiliateProfile(
-            campaignInfoAddress,
-            campaignUrl,
-          )) as any;
-      } else {
-        await new HandleAffiliateSUIOperations().updateAffiliateProfile(
-          campaignInfoAddress,
-          campaignUrl,
-          profileAddress,
-        );
-      }
+      //todo-ton - add ton to affiliate profile
 
       await affiliateSaveIntoDB({
         affiliateModel: this.affiliateModel,
         affiliateDto,
-        profileTxAddress,
         shortnerService: this.shortnerService,
       });
 

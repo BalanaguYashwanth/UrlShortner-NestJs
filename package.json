@@ -29,6 +29,8 @@
     "@nestjs/passport": "^10.0.3",
     "@nestjs/platform-express": "^10.0.0",
     "@nestjs/throttler": "^5.1.2",
+    "@orbs-network/ton-access": "^2.3.3",
+    "@ton/crypto": "^3.2.0",
     "aws-sdk": "^2.1642.0",
     "bcrypt": "^5.1.1",
     "cache-manager": "^5.4.0",
@@ -44,7 +46,8 @@
     "passport-local": "^1.0.0",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1",
-    "sqs-consumer": "^10.3.0"
+    "sqs-consumer": "^10.3.0",
+    "ton": "^13.9.0"
   },
   "devDependencies": {
     "@mysten/sui.js": "^0.54.1",

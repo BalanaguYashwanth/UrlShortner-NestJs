@@ -13,23 +13,17 @@ export const AffiliateSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Campaign URL is required'],
     },
-    campaignInfoAddress: {
-      type: String,
-      required: [true, 'campaign object address is required'],
-    },
     walletAddress: {
       type: String,
       required: [true, 'Wallet address is required'],
     },
+    campaignWalletAddress: {
+      type: String,
+      required: [true, 'Campaign Wallet Address is required'],
+    },
     cpc: {
       type: Number,
       default: 0,
-    },
-    profileAddress: {
-      type: String,
-    },
-    campaignProfileAddress: {
-      type: String,
     },
     urlAlias: {
       type: String,

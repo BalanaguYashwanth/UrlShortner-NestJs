@@ -21,9 +21,8 @@ export class AffiliateDto {
   originalUrl: string;
   campaignUrl: string;
   cpc: number;
-  campaignInfoAddress: string;
   walletAddress: string;
-  profileAddress: string;
+  campaignWalletAddress: string;
   expirationTime: string;
 }
 

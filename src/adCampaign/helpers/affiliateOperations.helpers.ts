@@ -150,23 +150,13 @@ export class HandleAffiliateSUIOperations {
 export const affiliateSaveIntoDB = async ({
   affiliateModel,
   affiliateDto,
-  profileTxAddress,
   shortnerService,
 }) => {
-  const { campaignUrl, campaignInfoAddress, originalUrl, walletAddress } =
-    affiliateDto;
-  //todo - check is it working properly or not
-  await new HandleAffiliateSUIOperations().createAffiliateCampaignProfile({
-    campaignInfoAddress,
-    campaignUrl,
-    profileAddress: profileTxAddress,
-    walletAddress,
-  });
+  const { campaignUrl, originalUrl } = affiliateDto;
 
   const affiliateResponse = (await affiliateModel.create({
     ...affiliateDto,
     urlAlias: campaignUrl.split('/')[3],
-    profileAddress: profileTxAddress,
   })) as any;
 
   const createShortUrlDto = {
@@ -182,13 +172,11 @@ export const affiliateSaveIntoDB = async ({
 
 export const getAffiliateCampaignDetails = async ({
   affiliateModel,
-  campaignInfoAddress,
-  profileAddress,
+  campaignWalletAddress,
   walletAddress,
 }) => {
   const details = await affiliateModel.findOne({
-    campaignInfoAddress,
-    profileAddress,
+    campaignWalletAddress,
     walletAddress,
   });
   return details;

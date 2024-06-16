@@ -68,53 +68,50 @@ export class ShortnerService {
   };
 
   recordAndUpdateShortURLMetrics = async ({ hasShortUrlDetails, ip }) => {
-    const {
-      totalIPAddress,
-      urlAlias,
-      campaignInfoAddress,
-      campaignProfileAddress,
-      profileAddress,
-    } = hasShortUrlDetails;
+    const { totalIPAddress, urlAlias, campaignWalletAddress } =
+      hasShortUrlDetails;
     try {
-      if (totalIPAddress.includes(ip)) {
-        await this.affiliateModel.updateOne(
-          {
-            urlAlias,
-          },
-          { $inc: { invalidClicks: 1 } },
-          { new: true },
-        );
-        (await this.campaignModel.findOneAndUpdate(
-          {
-            campaignInfoAddress,
-          },
-          { $inc: { invalidClicks: 1 } },
-          { new: true },
-        )) as any;
-        console.log('====invalid==response=====processed=====');
-      } else {
-        await this.handleUserClicksOps.updateClickCount({
-          campaignInfoAddress,
-          campaignProfileAddress,
-          profileAddress,
-        });
+      // if (totalIPAddress.includes(ip)) {
+      //   await this.affiliateModel.updateOne(
+      //     {
+      //       urlAlias,
+      //     },
+      //     { $inc: { invalidClicks: 1 } },
+      //     { new: true },
+      //   );
+      //   (await this.campaignModel.findOneAndUpdate(
+      //     {
+      //       campaignWalletAddress,
+      //     },
+      //     { $inc: { invalidClicks: 1 } },
+      //     { new: true },
+      //   )) as any;
+      //   console.log('====invalid==response=====processed=====');
+      // } else {
+      console.log(
+        'hasShortUrlDetails.walletAddress----->',
+        hasShortUrlDetails.walletAddress,
+      );
+      await this.handleUserClicksOps.updateClickCount({
+        affiliateAddress: hasShortUrlDetails.walletAddress,
+      });
 
-        (await this.affiliateModel.findOneAndUpdate(
-          {
-            urlAlias,
-          },
-          { $addToSet: { totalIPAddress: ip }, $inc: { validClicks: 1 } },
-          { new: true },
-        )) as any;
+      (await this.affiliateModel.findOneAndUpdate(
+        {
+          urlAlias,
+        },
+        { $addToSet: { totalIPAddress: ip }, $inc: { validClicks: 1 } },
+        { new: true },
+      )) as any;
 
-        (await this.campaignModel.findOneAndUpdate(
-          {
-            campaignInfoAddress,
-          },
-          { $inc: { validClicks: 1 } },
-          { new: true },
-        )) as any;
-      }
+      (await this.campaignModel.findOneAndUpdate(
+        {
+          campaignWalletAddress,
+        },
+        { $inc: { validClicks: 1 } },
+        { new: true },
+      )) as any;
+      // }
       console.log('---recieved---');
     } catch (error) {
       return error;
@@ -138,16 +135,17 @@ export class ShortnerService {
 
   processMetrics = async ({ hasShortUrlDetails, ip }: any) => {
     const {
-      campaignInfoAddress,
+      campaignWalletAddress,
       originalUrl,
       expirationTime = null,
       urlAlias,
+      walletAddress,
     } = hasShortUrlDetails as any;
 
     const urlExpired = await this.checkIsUrlExpired({
       originalUrl,
       expirationTime,
-      campaignInfoAddress,
+      campaignWalletAddress,
       urlAlias,
     });
 
@@ -159,14 +157,18 @@ export class ShortnerService {
       hasShortUrlDetails,
       ip,
     };
+
     await new Promise((resolve) => setTimeout(resolve, 1000));
     await this.recordAndUpdateShortURLMetrics(params);
     return originalUrl;
   };
 
-  checkIsUrlExpired = async ({ expirationTime, campaignInfoAddress }: any) => {
+  checkIsUrlExpired = async ({
+    expirationTime,
+    campaignWalletAddress,
+  }: any) => {
     if (checkUrlExpiration(expirationTime)) {
-      await this.handleUserClicksOps.updateClickExpire(campaignInfoAddress);
+      await this.handleUserClicksOps.updateClickExpire(campaignWalletAddress);
       return true;
     }
   };
