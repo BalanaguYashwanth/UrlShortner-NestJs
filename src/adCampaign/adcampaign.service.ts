@@ -118,9 +118,9 @@ export class AdCampaignService {
     return response;
   };
 
-  getCampaignInfoAffiliate = async (campaignInfoAddress: string) => {
+  getCampaignInfoAffiliate = async (campaignWalletAddress: string) => {
     const data = await this.affiliateModel.find(
-      { campaignInfoAddress },
+      { campaignWalletAddress },
       {
         _id: 0,
         walletAddress: 1,

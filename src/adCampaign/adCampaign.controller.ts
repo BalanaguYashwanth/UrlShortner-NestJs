@@ -85,9 +85,9 @@ export class AdCampaignController {
   }
   @Post('affiliate/id')
   async affiliateByCampaignId(@Req() req) {
-    const { campaignInfoAddress } = req.body;
+    const { campaignWalletAddress } = req.body;
     return await this.adCampaignService.getCampaignInfoAffiliate(
-      campaignInfoAddress,
+      campaignWalletAddress,
     );
   }
 
