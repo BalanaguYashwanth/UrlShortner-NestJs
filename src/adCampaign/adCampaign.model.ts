@@ -74,10 +74,6 @@ export const CampaignSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Original URL is required'],
     },
-    coinObjectAddress: {
-      type: String,
-      required: [true, 'Coin Object Address is required'],
-    },
     cpc: {
       type: Number,
       required: [true, 'CPC is required'],
@@ -98,17 +94,9 @@ export const CampaignSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Campaign Wallet Address is required'],
     },
-    campaignInfoAddress: {
-      type: String,
-      required: [true, 'Campaign Info Address is required'],
-    },
     packageAddress: {
       type: String,
       required: [true, 'Package Address is required'],
-    },
-    campaignConfig: {
-      type: String,
-      required: [true, 'Campaign Config Address is required'],
     },
     status: {
       type: Number,

@@ -24,9 +24,19 @@ export class AdCampaignService {
   ) {}
 
   createCampaign = async (campaignDto: CampaignDto) => {
-    await this.campaignModel.create({
-      ...campaignDto,
-    });
+    await this.campaignModel.findOneAndUpdate(
+      {
+        campaignWalletAddress: campaignDto.campaignWalletAddress,
+      },
+      {
+        $set: {
+          ...campaignDto,
+        },
+      },
+      {
+        upsert: true,
+      },
+    );
     return { status: 'success' };
   };
 
