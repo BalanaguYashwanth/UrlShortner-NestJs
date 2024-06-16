@@ -31,7 +31,6 @@
     "@nestjs/throttler": "^5.1.2",
     "@orbs-network/ton-access": "^2.3.3",
     "@ton/crypto": "^3.2.0",
-    "aws-sdk": "^2.1642.0",
     "bcrypt": "^5.1.1",
     "cache-manager": "^5.4.0",
     "cache-manager-redis-yet": "^4.2.0",
