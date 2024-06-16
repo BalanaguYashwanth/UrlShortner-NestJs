@@ -88,12 +88,9 @@ export class ShortnerService {
       //   )) as any;
       //   console.log('====invalid==response=====processed=====');
       // } else {
-      console.log(
-        'hasShortUrlDetails.walletAddress----->',
-        hasShortUrlDetails.walletAddress,
-      );
       await this.handleUserClicksOps.updateClickCount({
-        affiliateAddress: hasShortUrlDetails.walletAddress,
+        affiliateAddress: hasShortUrlDetails?.walletAddress,
+        cpc: hasShortUrlDetails?.cpc,
       });
 
       (await this.affiliateModel.findOneAndUpdate(

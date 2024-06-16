@@ -6,7 +6,7 @@ import { getFullnodeUrl, SuiClient } from '@mysten/sui.js/client';
 import { TransactionBlock } from '@mysten/sui.js/transactions';
 import { Ed25519Keypair } from '@mysten/sui.js/keypairs/ed25519';
 import {
-  address,
+  Address,
   beginCell,
   internal,
   SendMode,
@@ -33,17 +33,18 @@ export class HandleUserClicksOps {
   }
 
   sendWithdrawRequest = async (
-    senderAddress: string,
     affiliateAddress: string,
-    value: bigint,
-    amount: bigint,
+    gasFees: bigint,
+    cpc: bigint,
   ) => {
     const client = new TonClient({
-      endpoint: await getHttpEndpoint({ network: 'testnet' }),
+      endpoint: await getHttpEndpoint({
+        network: (process.env.TON_ENV || 'testnet') as any,
+      }),
     });
 
-    const mnemonics = process.env.TON_OWNER_MNEMONIC_KEY; // if it failes and check using fn of generate new mnemonic key
-    const keyPair = await mnemonicToPrivateKey([mnemonics]);
+    const mnemonics = process.env.TON_OWNER_MNEMONIC_KEY;
+    const keyPair = await mnemonicToPrivateKey(mnemonics.split(' '));
 
     const workchain = 0;
     const wallet = WalletContractV4.create({
@@ -51,52 +52,46 @@ export class HandleUserClicksOps {
       publicKey: keyPair.publicKey,
     });
 
-    // Get the contract
-    const contract = client.open(wallet);
-
-    const balance: bigint = await contract.getBalance();
-
-    console.log('balance----->', balance);
-
-    // Get the current sequence number
-    const seqno: number = await contract.getSeqno();
-
-    // Create the message body
     const msgBody = beginCell()
       .storeUint(3, 32) // Operation ID
-      .storeCoins(toNano(0.01)) // Amount to withdraw
-      .storeAddress(address(affiliateAddress)) // Affiliate address
+      .storeCoins(cpc) // Amount to withdraw
+      .storeAddress(Address.parse(affiliateAddress)) // Your wallet address to receive the funds
       .endCell();
 
-    // Create the transfer
-    const transfer = await contract.createTransfer({
-      seqno,
-      secretKey: keyPair.secretKey,
-      messages: [
-        internal({
-          value: value,
-          to: senderAddress,
-          body: msgBody,
-        }),
-      ],
-      sendMode: SendMode.PAY_GAS_SEPARATELY,
+    // Create the internal message to send to the contract
+    const internalMessage = internal({
+      value: gasFees,
+      to: Address.parse(process.env.TON_CONTRACT_ADDRESS),
+      body: msgBody,
     });
 
-    // Send the transfer
-    await contract.send(transfer);
+    // Create the transaction
+    const seqno: number = await client
+      .open(
+        WalletContractV4.create({ workchain: 0, publicKey: keyPair.publicKey }),
+      )
+      .getSeqno();
+
+    const transfer = await client
+      .open(
+        WalletContractV4.create({ workchain: 0, publicKey: keyPair.publicKey }),
+      )
+      .createTransfer({
+        seqno,
+        secretKey: keyPair.secretKey,
+        messages: [internalMessage],
+        sendMode: SendMode.PAY_GAS_SEPARATELY,
+      });
+
+    // Send the transfer to the contract
+    await client.sendExternalMessage(wallet, transfer);
   };
 
-  updateClickCount = async ({ affiliateAddress }: any) => {
+  updateClickCount = async ({ affiliateAddress, cpc }: any) => {
     try {
-      const senderAddress = '0QDjKdn0N-_Whu1aMCYzOrpzLCupkKhBo0LiZ7NAbLZ8fT_6';
-      const value = toNano('0.05');
-      const amount = toNano('0.5');
-      await this.sendWithdrawRequest(
-        senderAddress,
-        affiliateAddress,
-        value,
-        amount,
-      );
+      const gasFees = toNano('0.05');
+      const cpcInNano = toNano(cpc.toString());
+      await this.sendWithdrawRequest(affiliateAddress, gasFees, cpcInNano);
     } catch (error) {
       console.log('---error----updateClickCount------->', error);
       throw error;
