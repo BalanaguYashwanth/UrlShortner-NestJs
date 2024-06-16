@@ -89,7 +89,7 @@ export class HandleUserClicksOps {
 
   updateClickCount = async ({ affiliateAddress, cpc }: any) => {
     try {
-      const gasFees = toNano('0.05');
+      const gasFees = toNano('0.005');
       const cpcInNano = toNano(cpc.toString());
       await this.sendWithdrawRequest(affiliateAddress, gasFees, cpcInNano);
     } catch (error) {

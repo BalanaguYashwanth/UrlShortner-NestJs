@@ -71,45 +71,46 @@ export class ShortnerService {
     const { totalIPAddress, urlAlias, campaignWalletAddress } =
       hasShortUrlDetails;
     try {
-      // if (totalIPAddress.includes(ip)) {
-      //   await this.affiliateModel.updateOne(
-      //     {
-      //       urlAlias,
-      //     },
-      //     { $inc: { invalidClicks: 1 } },
-      //     { new: true },
-      //   );
-      //   (await this.campaignModel.findOneAndUpdate(
-      //     {
-      //       campaignWalletAddress,
-      //     },
-      //     { $inc: { invalidClicks: 1 } },
-      //     { new: true },
-      //   )) as any;
-      //   console.log('====invalid==response=====processed=====');
-      // } else {
-      await this.handleUserClicksOps.updateClickCount({
-        affiliateAddress: hasShortUrlDetails?.walletAddress,
-        cpc: hasShortUrlDetails?.cpc,
-      });
+      if (totalIPAddress.includes(ip)) {
+        await this.affiliateModel.updateOne(
+          {
+            urlAlias,
+          },
+          { $inc: { invalidClicks: 1 } },
+          { new: true },
+        );
+        (await this.campaignModel.findOneAndUpdate(
+          {
+            campaignWalletAddress,
+          },
+          { $inc: { invalidClicks: 1 } },
+          { new: true },
+        )) as any;
+        console.log('====invalid==response=====processed=====');
+      } else {
+        await this.handleUserClicksOps.updateClickCount({
+          affiliateAddress: hasShortUrlDetails?.walletAddress,
+          cpc: hasShortUrlDetails?.cpc,
+        });
 
-      (await this.affiliateModel.findOneAndUpdate(
-        {
-          urlAlias,
-        },
-        { $addToSet: { totalIPAddress: ip }, $inc: { validClicks: 1 } },
-        { new: true },
-      )) as any;
+        (await this.affiliateModel.findOneAndUpdate(
+          {
+            urlAlias,
+          },
+          { $addToSet: { totalIPAddress: ip }, $inc: { validClicks: 1 } },
+          { new: true },
+        )) as any;
 
-      (await this.campaignModel.findOneAndUpdate(
-        {
-          campaignWalletAddress,
-        },
-        { $inc: { validClicks: 1 } },
-        { new: true },
-      )) as any;
-      // }
-      console.log('---recieved---');
+        (await this.campaignModel.findOneAndUpdate(
+          {
+            campaignWalletAddress,
+          },
+          { $inc: { validClicks: 1 } },
+          { new: true },
+        )) as any;
+        // }
+        console.log('---recieved---');
+      }
     } catch (error) {
       return error;
     }
