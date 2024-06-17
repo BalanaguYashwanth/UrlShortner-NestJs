@@ -1,7 +1,8 @@
 export class CampaignDto {
+  description: string;
   campaignName: string;
   companyName: string;
-  description: string;
+  campaignId: number;
   category: string;
   original_url: string;
   campaign_url: string;
@@ -18,10 +19,12 @@ export class CampaignDto {
 }
 
 export class AffiliateDto {
+  affiliateId: number;
   originalUrl: string;
   campaignUrl: string;
   cpc: number;
   walletAddress: string;
+  campaignId: number;
   campaignWalletAddress: string;
   expirationTime: string;
 }

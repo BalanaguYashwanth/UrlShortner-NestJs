@@ -2,6 +2,10 @@ import mongoose from 'mongoose';
 
 export const AffiliateSchema = new mongoose.Schema(
   {
+    affiliateId: {
+      type: Number,
+      required: [true, 'Affiliate Id is required'],
+    },
     expirationTime: {
       type: String,
     },
@@ -16,6 +20,10 @@ export const AffiliateSchema = new mongoose.Schema(
     walletAddress: {
       type: String,
       required: [true, 'Wallet address is required'],
+    },
+    campaignId: {
+      type: Number,
+      required: [true, 'Campaign Id is required'],
     },
     campaignWalletAddress: {
       type: String,
@@ -47,6 +55,10 @@ export const AffiliateSchema = new mongoose.Schema(
 
 export const CampaignSchema = new mongoose.Schema(
   {
+    campaignId: {
+      type: Number,
+      required: [true, 'Campaign Id is required'],
+    },
     companyName: {
       type: String,
       required: [true, 'Company Name is required'],

@@ -5,7 +5,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { AffiliateDto, CampaignDto, SupportersDto } from './adCampaign.dto';
 import { ShortnerService } from 'src/shortner/shortner.service';
 import {
-  affiliateSaveIntoDB,
+  saveAffiliate,
   getAffiliateCampaignDetails,
   HandleAffiliateSUIOperations,
 } from './helpers/affiliateOperations.helpers';
@@ -26,7 +26,7 @@ export class AdCampaignService {
   createCampaign = async (campaignDto: CampaignDto) => {
     await this.campaignModel.findOneAndUpdate(
       {
-        campaignWalletAddress: campaignDto.campaignWalletAddress,
+        campaignId: Number(campaignDto?.campaignId),
       },
       {
         $set: {
@@ -74,30 +74,30 @@ export class AdCampaignService {
 
   createAffiliate = async (affiliateDto: AffiliateDto) => {
     //todo - check endtime and allow this request
-    const { walletAddress, campaignWalletAddress, expirationTime } =
-      affiliateDto;
+    const { walletAddress, campaignId, expirationTime } = affiliateDto;
     const currentTime = moment().unix();
 
     if (currentTime > parseInt(expirationTime)) {
       throw new Error('campaign already expired');
     }
 
+    //todo - don't pass model and DTO
     try {
       const hasAffiliateExists = (await getAffiliateCampaignDetails({
         affiliateModel: this.affiliateModel,
-        campaignWalletAddress,
+        campaignId,
         walletAddress,
       })) as any;
       if (hasAffiliateExists) {
-        return { campaignUrl: hasAffiliateExists.campaignUrl };
+        return { campaignUrl: hasAffiliateExists?.campaignUrl };
       }
 
-      //todo-ton - add ton to affiliate profile
-
-      await affiliateSaveIntoDB({
+      await saveAffiliate({
         affiliateModel: this.affiliateModel,
         affiliateDto,
+        walletAddress,
         shortnerService: this.shortnerService,
+        campaignId,
       });
 
       return { campaignUrl: affiliateDto.campaignUrl };
@@ -107,8 +107,10 @@ export class AdCampaignService {
     }
   };
 
-  getCampaignById = async (campaignInfoAddress: string) => {
-    const response = await this.campaignModel.find({ campaignInfoAddress });
+  getCampaignById = async (campaignId: string) => {
+    const response = await this.campaignModel.find({
+      campaignId: Number(campaignId),
+    });
     return response;
   };
 
@@ -118,9 +120,9 @@ export class AdCampaignService {
     return response;
   };
 
-  getCampaignInfoAffiliate = async (campaignWalletAddress: string) => {
+  getCampaignInfoAffiliate = async (campaignId: number) => {
     const data = await this.affiliateModel.find(
-      { campaignWalletAddress },
+      { campaignId: Number(campaignId) },
       {
         _id: 0,
         walletAddress: 1,
@@ -134,10 +136,10 @@ export class AdCampaignService {
   };
 
   //todo - add total clicks  = valid clicks + invalid clicks
-  getAffiliateMetricsByID = async (campaignInfoAddress: string) => {
+  getAffiliateMetricsByID = async (campaignId: number) => {
     const aggregateQuery = [
       {
-        $match: { campaignInfoAddress },
+        $match: { campaignId },
       },
       {
         $group: {

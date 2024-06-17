@@ -1,6 +1,17 @@
 import { getFullnodeUrl, SuiClient } from '@mysten/sui.js/client';
 import { TransactionBlock } from '@mysten/sui.js/transactions';
 import { Ed25519Keypair } from '@mysten/sui.js/keypairs/ed25519';
+import {
+  Address,
+  beginCell,
+  internal,
+  SendMode,
+  toNano,
+  TonClient,
+  WalletContractV4,
+} from 'ton';
+import { mnemonicToPrivateKey } from '@ton/crypto';
+import { getHttpEndpoint } from '@orbs-network/ton-access';
 
 export class HandleAffiliateSUIOperations {
   private suiClient;
@@ -147,14 +158,111 @@ export class HandleAffiliateSUIOperations {
   };
 }
 
-export const affiliateSaveIntoDB = async ({
+const generateUniqueNumericId = () => {
+  const timestamp = Date.now() % 100000; // Use last 5 digits of timestamp
+  const randomNum = Math.floor(Math.random() * 100000); // Random number between 0 and 99999
+  const uniqueId = (timestamp * 100000 + randomNum) % 2147483647; // Ensure it fits 32-bit range
+  return uniqueId;
+};
+
+const registerAffiliateProfile = async ({
+  walletAddress,
+  campaignId,
+  campaignWalletAddress,
+  affiliateId,
+  campaignUrl,
+  originalUrl,
+}: any) => {
+  const client = new TonClient({
+    endpoint: await getHttpEndpoint({
+      network: (process.env.TON_ENV || 'testnet') as any,
+    }),
+  });
+
+  const mnemonics = process.env.TON_OWNER_MNEMONIC_KEY;
+  const keyPair = await mnemonicToPrivateKey(mnemonics.split(' '));
+
+  const workchain = 0;
+  const wallet = WalletContractV4.create({
+    workchain,
+    publicKey: keyPair.publicKey,
+  });
+
+  const campaignUrlCell = beginCell()
+    .storeBuffer(Buffer.from(campaignUrl, 'utf-8'))
+    .endCell();
+
+  const originalUrlCell = beginCell()
+    .storeBuffer(Buffer.from(originalUrl, 'utf-8'))
+    .endCell();
+
+  const msgBody = beginCell()
+    .storeUint(2, 32) // Operation ID
+    .storeAddress(Address.parse(walletAddress))
+    .storeUint(campaignId, 32)
+    .storeAddress(Address.parse(campaignWalletAddress))
+    .storeRef(campaignUrlCell)
+    .storeRef(originalUrlCell)
+    .storeUint(0, 32)
+    .storeUint(0, 32)
+    .storeUint(affiliateId, 64)
+    .endCell();
+
+  // Create the internal message to send to the contract
+  const internalMessage = internal({
+    value: toNano('0.05'),
+    to: Address.parse(process.env.TON_CONTRACT_ADDRESS),
+    body: msgBody,
+  });
+
+  // Create the transaction
+  const seqno: number = await client
+    .open(
+      WalletContractV4.create({ workchain: 0, publicKey: keyPair.publicKey }),
+    )
+    .getSeqno();
+
+  const transfer = await client
+    .open(
+      WalletContractV4.create({ workchain: 0, publicKey: keyPair.publicKey }),
+    )
+    .createTransfer({
+      seqno,
+      secretKey: keyPair.secretKey,
+      messages: [internalMessage],
+      sendMode: SendMode.PAY_GAS_SEPARATELY,
+    });
+
+  // Send the transfer to the contract
+  await client.sendExternalMessage(wallet, transfer);
+};
+
+export const saveAffiliate = async ({
   affiliateModel,
   affiliateDto,
   shortnerService,
+  walletAddress,
+  campaignId,
 }) => {
-  const { campaignUrl, originalUrl } = affiliateDto;
+  const { campaignUrl, originalUrl, campaignWalletAddress } = affiliateDto;
+  const affiliateDetails = await affiliateModel.findOne({
+    walletAddress,
+  });
+  const affiliateUinqueId =
+    affiliateDetails?.affiliateId || generateUniqueNumericId();
+
+  registerAffiliateProfile({
+    walletAddress,
+    campaignId,
+    affiliateId: affiliateUinqueId,
+    campaignWalletAddress,
+    campaignUrl,
+    originalUrl,
+  });
 
   const affiliateResponse = (await affiliateModel.create({
+    affiliateId: affiliateUinqueId,
+    campaignId,
     ...affiliateDto,
     urlAlias: campaignUrl.split('/')[3],
   })) as any;
@@ -172,11 +280,11 @@ export const affiliateSaveIntoDB = async ({
 
 export const getAffiliateCampaignDetails = async ({
   affiliateModel,
-  campaignWalletAddress,
+  campaignId,
   walletAddress,
 }) => {
   const details = await affiliateModel.findOne({
-    campaignWalletAddress,
+    campaignId,
     walletAddress,
   });
   return details;

@@ -68,8 +68,7 @@ export class ShortnerService {
   };
 
   recordAndUpdateShortURLMetrics = async ({ hasShortUrlDetails, ip }) => {
-    const { totalIPAddress, urlAlias, campaignWalletAddress } =
-      hasShortUrlDetails;
+    const { totalIPAddress, urlAlias, campaignId } = hasShortUrlDetails;
     try {
       if (totalIPAddress.includes(ip)) {
         await this.affiliateModel.updateOne(
@@ -81,7 +80,7 @@ export class ShortnerService {
         );
         (await this.campaignModel.findOneAndUpdate(
           {
-            campaignWalletAddress,
+            campaignId: Number(campaignId),
           },
           { $inc: { invalidClicks: 1 } },
           { new: true },
@@ -103,7 +102,7 @@ export class ShortnerService {
 
         (await this.campaignModel.findOneAndUpdate(
           {
-            campaignWalletAddress,
+            campaignId: Number(campaignId),
           },
           { $inc: { validClicks: 1 } },
           { new: true },
@@ -137,7 +136,6 @@ export class ShortnerService {
       originalUrl,
       expirationTime = null,
       urlAlias,
-      walletAddress,
     } = hasShortUrlDetails as any;
 
     const urlExpired = await this.checkIsUrlExpired({

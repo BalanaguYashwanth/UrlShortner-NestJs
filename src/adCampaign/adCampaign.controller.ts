@@ -48,8 +48,8 @@ export class AdCampaignController {
 
   @Post('campaigns/id')
   async campaignById(@Req() req) {
-    const { campaignInfoAddress } = req.body;
-    return await this.adCampaignService.getCampaignById(campaignInfoAddress);
+    const { campaignId } = req.body;
+    return await this.adCampaignService.getCampaignById(campaignId);
   }
 
   @Post('campaign/create')
@@ -85,18 +85,14 @@ export class AdCampaignController {
   }
   @Post('affiliate/id')
   async affiliateByCampaignId(@Req() req) {
-    const { campaignWalletAddress } = req.body;
-    return await this.adCampaignService.getCampaignInfoAffiliate(
-      campaignWalletAddress,
-    );
+    const { campaignId } = req.body;
+    return await this.adCampaignService.getCampaignInfoAffiliate(campaignId);
   }
 
   @Post('affiliate/metrics')
   async affiliateTotal(@Req() req) {
-    const { campaignInfoAddress } = req.body;
-    return await this.adCampaignService.getAffiliateMetricsByID(
-      campaignInfoAddress,
-    );
+    const { campaignId } = req.body;
+    return await this.adCampaignService.getAffiliateMetricsByID(campaignId);
   }
   ////////////affiliates//////////////////
 
