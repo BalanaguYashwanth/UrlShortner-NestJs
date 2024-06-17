@@ -2,7 +2,6 @@ import { Model } from 'mongoose';
 import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { TimeAnalyticsProps, UrlHistoryProps } from './shortner.model';
-import { QueueService } from 'src/queue/queue.service';
 import { CreateShortUrlDto } from './shortner.dto';
 import { checkUrlExpiration, mapUserAgentToDeviceInfo } from './helpers';
 import { HandleUserClicksOps } from './common/handleUserClicksOps.helpers';
@@ -19,8 +18,6 @@ export class ShortnerService {
     @InjectModel('TimeAnalytics')
     private readonly timeAnalyticsModel: Model<TimeAnalyticsProps>,
     private readonly handleUserClicksOps: HandleUserClicksOps,
-    @Inject(forwardRef(() => QueueService))
-    private readonly queueService: QueueService,
   ) {}
 
   recordAnalytics = async (

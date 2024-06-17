@@ -3,7 +3,6 @@ import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ShortnerModule } from './shortner/shortner.module';
 import { AdCampaignModule } from './adCampaign/adCampaign.module';
-import { QueueModule } from './queue/queue.module';
 import { SearchBotModule } from './searchBot/searchBot.module';
 
 @Module({
@@ -12,7 +11,6 @@ import { SearchBotModule } from './searchBot/searchBot.module';
     MongooseModule.forRoot(process.env.MONGO_URI),
     AdCampaignModule,
     ShortnerModule,
-    QueueModule,
     SearchBotModule,
   ],
   providers: [],

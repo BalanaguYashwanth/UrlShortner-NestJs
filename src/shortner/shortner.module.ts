@@ -10,11 +10,9 @@ import {
   CampaignSchema,
 } from 'src/adCampaign/adCampaign.model';
 import { HandleUserClicksOps } from './common/handleUserClicksOps.helpers';
-import { QueueModule } from 'src/queue/queue.module';
 
 @Module({
   imports: [
-    forwardRef(() => QueueModule),
     MongooseModule.forFeature([
       {
         name: 'Affiliate',
