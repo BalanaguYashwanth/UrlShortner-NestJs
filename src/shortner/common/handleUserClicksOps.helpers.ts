@@ -32,8 +32,9 @@ export class HandleUserClicksOps {
     this.keyPair = Ed25519Keypair.deriveKeypair(process.env.OWNER_MNEMONIC_KEY);
   }
 
-  sendWithdrawRequest = async (
+  sendWithdrawRequestAndUpdateAffiliateActivity = async (
     affiliateAddress: string,
+    affiliateId: number,
     gasFees: bigint,
     cpc: bigint,
   ) => {
@@ -58,11 +59,23 @@ export class HandleUserClicksOps {
       .storeAddress(Address.parse(affiliateAddress)) // Your wallet address to receive the funds
       .endCell();
 
+    const msgBodyAffiliateActivity = beginCell()
+      .storeUint(4, 32)
+      .storeUint(affiliateId, 32)
+      .storeUint(cpc, 32)
+      .endCell();
+
     // Create the internal message to send to the contract
     const internalMessage = internal({
       value: gasFees,
       to: Address.parse(process.env.TON_CONTRACT_ADDRESS),
       body: msgBody,
+    });
+
+    const internalMessageAffiliateActivity = internal({
+      value: gasFees,
+      to: Address.parse(process.env.TON_CONTRACT_ADDRESS),
+      body: msgBodyAffiliateActivity,
     });
 
     // Create the transaction
@@ -79,7 +92,7 @@ export class HandleUserClicksOps {
       .createTransfer({
         seqno,
         secretKey: keyPair.secretKey,
-        messages: [internalMessage],
+        messages: [internalMessage, internalMessageAffiliateActivity],
         sendMode: SendMode.PAY_GAS_SEPARATELY,
       });
 
@@ -87,11 +100,16 @@ export class HandleUserClicksOps {
     await client.sendExternalMessage(wallet, transfer);
   };
 
-  updateClickCount = async ({ affiliateAddress, cpc }: any) => {
+  updateClickCount = async ({ affiliateAddress, affiliateId, cpc }: any) => {
     try {
       const gasFees = toNano('0.005');
       const cpcInNano = toNano(cpc.toString());
-      await this.sendWithdrawRequest(affiliateAddress, gasFees, cpcInNano);
+      await this.sendWithdrawRequestAndUpdateAffiliateActivity(
+        affiliateAddress,
+        affiliateId,
+        gasFees,
+        cpcInNano,
+      );
     } catch (error) {
       console.log('---error----updateClickCount------->', error);
       throw error;

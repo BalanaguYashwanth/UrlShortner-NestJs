@@ -68,7 +68,8 @@ export class ShortnerService {
   };
 
   recordAndUpdateShortURLMetrics = async ({ hasShortUrlDetails, ip }) => {
-    const { totalIPAddress, urlAlias, campaignId } = hasShortUrlDetails;
+    const { totalIPAddress, urlAlias, campaignId, affiliateId } =
+      hasShortUrlDetails;
     try {
       if (totalIPAddress.includes(ip)) {
         await this.affiliateModel.updateOne(
@@ -89,6 +90,7 @@ export class ShortnerService {
       } else {
         await this.handleUserClicksOps.updateClickCount({
           affiliateAddress: hasShortUrlDetails?.walletAddress,
+          affiliateId,
           cpc: hasShortUrlDetails?.cpc,
         });
 
