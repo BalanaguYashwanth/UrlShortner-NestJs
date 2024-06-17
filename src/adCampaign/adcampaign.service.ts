@@ -3,20 +3,17 @@ import { Injectable } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { AffiliateDto, CampaignDto, SupportersDto } from './adCampaign.dto';
-import { ShortnerService } from 'src/shortner/shortner.service';
 import {
   affiliateSaveIntoDB,
   getAffiliateCampaignDetails,
   HandleAffiliateSUIOperations,
 } from './helpers/affiliateOperations.helpers';
-import { transformAffiliateData } from 'src/shortner/helpers';
 
 @Injectable()
 export class AdCampaignService {
   constructor(
     @InjectModel('Campaign')
     private readonly campaignModel: Model<any>,
-    private shortnerService: ShortnerService,
     @InjectModel('Affiliate')
     private readonly affiliateModel: Model<any>,
     @InjectModel('Supporters')
@@ -104,12 +101,7 @@ export class AdCampaignService {
         );
       }
 
-      await affiliateSaveIntoDB({
-        affiliateModel: this.affiliateModel,
-        affiliateDto,
-        profileTxAddress,
-        shortnerService: this.shortnerService,
-      });
+
 
       return { campaignUrl: affiliateDto.campaignUrl };
     } catch (err) {
@@ -140,8 +132,7 @@ export class AdCampaignService {
       },
     );
 
-    const transformedData = transformAffiliateData(data);
-    return transformedData;
+    return null;
   };
 
   //todo - add total clicks  = valid clicks + invalid clicks

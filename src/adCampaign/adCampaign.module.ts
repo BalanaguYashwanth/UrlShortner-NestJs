@@ -9,15 +9,9 @@ import {
 } from './adCampaign.model';
 import { AdCampaignController } from './adCampaign.controller';
 import { AdCampaignService } from './adcampaign.service';
-import { ShortnerModule } from 'src/shortner/shortner.module';
-import {
-  TimeAnalyticsSchema,
-  UrlHistorySchema,
-} from 'src/shortner/shortner.model';
 
 @Module({
   imports: [
-    ShortnerModule,
     MongooseModule.forFeature([
       {
         name: 'Campaign',
@@ -31,14 +25,6 @@ import {
         name: 'Supporters',
         schema: SupportersSchema,
       },
-    ]),
-    MongooseModule.forFeature([
-      {
-        name: 'UrlHistory',
-        schema: UrlHistorySchema,
-        collection: 'urlhistory',
-      },
-      { name: 'TimeAnalytics', schema: TimeAnalyticsSchema },
     ]),
     ThrottlerModule.forRoot([
       {

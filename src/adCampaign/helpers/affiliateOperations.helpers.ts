@@ -151,7 +151,6 @@ export const affiliateSaveIntoDB = async ({
   affiliateModel,
   affiliateDto,
   profileTxAddress,
-  shortnerService,
 }) => {
   const { campaignUrl, campaignInfoAddress, originalUrl, walletAddress } =
     affiliateDto;
@@ -174,10 +173,7 @@ export const affiliateSaveIntoDB = async ({
     shortUrl: campaignUrl,
   };
 
-  await shortnerService.createShortURL(
-    affiliateResponse._id,
-    createShortUrlDto,
-  );
+
 };
 
 export const getAffiliateCampaignDetails = async ({
