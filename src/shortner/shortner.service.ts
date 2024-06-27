@@ -1,4 +1,5 @@
 import { Model } from 'mongoose';
+import ProxyCheck from 'proxycheck-ts';
 import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { TimeAnalyticsProps, UrlHistoryProps } from './shortner.model';
@@ -67,37 +68,80 @@ export class ShortnerService {
     return shortUrl;
   };
 
+  restrictvpn = async (ip) => {
+    const proxyCheck = new ProxyCheck({ api_key: process.env.PROXY_CHECK_KEY });
+    try {
+      const result = await proxyCheck.checkIP(ip, {
+        asn: 1,
+        vpn: 3,
+      });
+      const ipResult = result[ip];
+      if (ipResult && (ipResult.proxy==='yes' && ipResult.vpn === 'yes')) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (error) {
+      console.error('Error checking IP:', error);
+      return false;
+    }
+  };
+  
+  validateIpAddress = async (hasShortUrlDetails, ip) => {
+    const { totalIPAddress } = hasShortUrlDetails;
+    if (totalIPAddress.includes(ip)) {
+      return true;
+    }
+    return false;
+  };
+  
+  validateIpAddressActivity = async (hasShortUrlDetails) => {
+    const { totalIPAddressActivity } = hasShortUrlDetails;
+    const currentDate = new Date().toLocaleDateString();
+    const bottomDate = totalIPAddressActivity[totalIPAddressActivity.length - 1]?.date || '';
+    if (currentDate === bottomDate && totalIPAddressActivity[totalIPAddressActivity.length - 1].ipAddress.length === 5) {
+      return true;
+    }
+    return false;
+  };
+  
+  validateIpAddressActivityCount = async (hasShortUrlDetails, ip) => {
+    if (await this.restrictvpn(ip)) {
+      return true;
+    }
+    if (await this.validateIpAddress(hasShortUrlDetails, ip)) {
+      return true;
+    }
+    if (await this.validateIpAddressActivity(hasShortUrlDetails)) {
+      return true;
+    }
+    return false;
+  };
+  
   recordAndUpdateShortURLMetrics = async ({ hasShortUrlDetails, ip }) => {
     const {
-      totalIPAddress,
       urlAlias,
       campaignInfoAddress,
       campaignProfileAddress,
       profileAddress,
-      walletAddress,
+      totalIPAddressActivity
     } = hasShortUrlDetails;
     try {
-      if (
-        totalIPAddress.includes(ip) ||
-        walletAddress ===
-          '0xc9b43975021bdda84230882545e5ec274eb55227ee3c400e50ffcf06f50df400' ||
-        walletAddress ===
-          '0x4aea4b6e254b03ea9e44761de6c8a33e75b201d4d652dfe442df1e5b97150bbb'
-      ) {
+      if (await this.validateIpAddressActivityCount(hasShortUrlDetails, ip)) {
         await this.affiliateModel.updateOne(
           {
             urlAlias,
           },
-          { $inc: { invalidClicks: 1 } },
-          { new: true },
+          { $addToSet: { totalIPAddress: ip }, $inc: { invalidClicks: 1 } },
+          { new: true }
         );
-        (await this.campaignModel.findOneAndUpdate(
+        await this.campaignModel.findOneAndUpdate(
           {
             campaignInfoAddress,
           },
           { $inc: { invalidClicks: 1 } },
-          { new: true },
-        )) as any;
+          { new: true }
+        );
         console.log('====invalid==response=====processed=====');
       } else {
         await this.handleUserClicksOps.updateClickCount({
@@ -105,29 +149,62 @@ export class ShortnerService {
           campaignProfileAddress,
           profileAddress,
         });
-
-        (await this.affiliateModel.findOneAndUpdate(
-          {
-            urlAlias,
-          },
-          { $addToSet: { totalIPAddress: ip }, $inc: { validClicks: 1 } },
-          { new: true },
-        )) as any;
-
-        (await this.campaignModel.findOneAndUpdate(
+  
+        const currentDate = new Date().toLocaleDateString();
+        const existingDateEntry = totalIPAddressActivity[totalIPAddressActivity.length - 1]?.date === currentDate? true: false;
+  
+        if (existingDateEntry) {
+          await this.affiliateModel.findOneAndUpdate(
+            {
+              urlAlias,
+              "totalIPAddressActivity.date": currentDate,
+            },
+            {
+              $addToSet: { totalIPAddress: ip },
+              $inc: { validClicks: 1 },
+              $push: {
+                "totalIPAddressActivity.$.ipAddress": ip,
+              },
+            },
+            {
+              new: true,
+              upsert: true,
+            }
+          );
+        } else {
+          await this.affiliateModel.findOneAndUpdate(
+            {
+              urlAlias,
+            },
+            {
+              $addToSet: { totalIPAddress: ip },
+              $inc: { validClicks: 1 },
+              $push: {
+                totalIPAddressActivity: { date: currentDate, ipAddress: [ip] },
+              },
+            },
+            {
+              new: true,
+              upsert: true,
+            }
+          );
+        }
+  
+        await this.campaignModel.findOneAndUpdate(
           {
             campaignInfoAddress,
           },
           { $inc: { validClicks: 1 } },
-          { new: true },
-        )) as any;
+          { new: true }
+        );
       }
-      console.log('---recieved---');
+      console.log('---received---');
     } catch (error) {
-      return error;
+      console.error('Error in recordAndUpdateShortURLMetrics:', error);
+      return error
     }
   };
-
+  
   getShortURL = async (urlAlias: string, ip: string, userAgent: string) => {
     try {
       //todo - implement the redis cache, so db calls will be reduce and price also reduce.

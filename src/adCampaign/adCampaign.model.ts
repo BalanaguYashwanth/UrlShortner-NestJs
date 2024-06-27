@@ -45,6 +45,19 @@ export const AffiliateSchema = new mongoose.Schema(
     totalIPAddress: {
       type: Array,
     },
+    totalIPAddressActivity: {
+      type: [{
+        date: {
+          type: String,
+          required: true
+        },
+        ipAddress: {
+          type: [String],
+          default: []
+        }
+      }],
+      default: []
+    },
   },
   {
     timestamps: true,
