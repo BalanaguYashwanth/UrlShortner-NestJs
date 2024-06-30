@@ -94,6 +94,13 @@ export const CampaignSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Campaign Info Address is required'],
     },
+    campaignWalletAddress: {
+      type: String,
+    },
+    campaignUID: {
+      type: String,
+      required: [true, 'Campaign UID is required'],
+    },
     companyXProfile: {
       type: String,
       required: [false],
@@ -125,6 +132,9 @@ export const CampaignSchema = new mongoose.Schema(
     dislikes: {
       type: [String],
       default: [],
+    },
+    txHash: {
+      type: String,
     },
   },
   {

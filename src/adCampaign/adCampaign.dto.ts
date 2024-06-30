@@ -3,11 +3,10 @@ export class CampaignDto {
   companyName: string;
   description: string;
   category: string;
-  original_url: string;
-  campaign_url: string;
+  originalUrl: string;
   total_clicks: number;
   cpc: string;
-  budget: string;
+  campaignBudget: string;
   coinObjectAddress: string;
   startDate: string;
   endDate: string;
@@ -17,8 +16,8 @@ export class CampaignDto {
   campaignvideolink: string;
   packageAddress: string;
   status: string;
-  likes:[string];
-  dislikes:[string];  
+  likes: [string];
+  dislikes: [string];
 }
 
 export class AffiliateDto {
