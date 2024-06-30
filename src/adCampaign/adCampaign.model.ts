@@ -74,10 +74,6 @@ export const CampaignSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Original URL is required'],
     },
-    coinObjectAddress: {
-      type: String,
-      required: [true, 'Coin Object Address is required'],
-    },
     cpc: {
       type: Number,
       required: [true, 'CPC is required'],
@@ -94,15 +90,11 @@ export const CampaignSchema = new mongoose.Schema(
       type: String,
       required: [true, 'End Date is required'],
     },
-    campaignWalletAddress: {
-      type: String,
-      required: [true, 'Campaign Wallet Address is required'],
-    },
     campaignInfoAddress: {
       type: String,
       required: [true, 'Campaign Info Address is required'],
     },
-    companyXProfile:{
+    companyXProfile: {
       type: String,
       required: [false],
     },
@@ -113,10 +105,6 @@ export const CampaignSchema = new mongoose.Schema(
     packageAddress: {
       type: String,
       required: [true, 'Package Address is required'],
-    },
-    campaignConfig: {
-      type: String,
-      required: [true, 'Campaign Config Address is required'],
     },
     status: {
       type: Number,
@@ -131,7 +119,7 @@ export const CampaignSchema = new mongoose.Schema(
       default: 0,
     },
     likes: {
-      type: [String], 
+      type: [String],
       default: [],
     },
     dislikes: {
