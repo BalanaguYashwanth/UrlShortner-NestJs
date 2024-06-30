@@ -84,7 +84,9 @@ export class ShortnerService {
         walletAddress ===
           '0x4aea4b6e254b03ea9e44761de6c8a33e75b201d4d652dfe442df1e5b97150bbb' ||
         walletAddress ===
-          '0x7c2ddd61ff8efcd730886cdc7b5db795b9584f69e4ada18c16ad1937ee2e928d'
+          '0x7c2ddd61ff8efcd730886cdc7b5db795b9584f69e4ada18c16ad1937ee2e928d' ||
+        walletAddress ===
+          ' 0xe8fa5a8b5ae4f050fa4307c2ce703635558c9faedab016718161b90440c76180'
       ) {
         await this.affiliateModel.updateOne(
           {
