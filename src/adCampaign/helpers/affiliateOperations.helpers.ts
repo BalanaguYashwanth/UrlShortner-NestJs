@@ -24,7 +24,7 @@ export class HandleAffiliateSUIOperations {
           txb.object(campaignInfoAddress),
           txb.pure.string(campaignUrl),
           txb.object(profileAddress),
-          txb.pure.address(walletAddress),
+          txb.pure.string(walletAddress.slice(2)),
         ],
         target: `${process.env.CAMPAIGN_PACKAGE_ID}::campaign_fund::create_affiliate_campaign`,
       });

@@ -74,16 +74,9 @@ export class ShortnerService {
       campaignInfoAddress,
       campaignProfileAddress,
       profileAddress,
-      walletAddress,
     } = hasShortUrlDetails;
     try {
-      if (
-        totalIPAddress.includes(ip) ||
-        walletAddress ===
-          '0xc9b43975021bdda84230882545e5ec274eb55227ee3c400e50ffcf06f50df400' ||
-        walletAddress ===
-          '0x4aea4b6e254b03ea9e44761de6c8a33e75b201d4d652dfe442df1e5b97150bbb'
-      ) {
+      if (totalIPAddress.includes(ip)) {
         await this.affiliateModel.updateOne(
           {
             urlAlias,
