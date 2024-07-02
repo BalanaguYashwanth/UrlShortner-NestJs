@@ -17,8 +17,8 @@ export class CampaignDto {
   campaignvideolink: string;
   packageAddress: string;
   status: string;
-  likes:[string];
-  dislikes:[string];  
+  likes: [string];
+  dislikes: [string];
 }
 
 export class AffiliateDto {
