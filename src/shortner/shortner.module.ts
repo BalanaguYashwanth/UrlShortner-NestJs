@@ -34,7 +34,7 @@ import { QueueModule } from 'src/queue/queue.module';
     ThrottlerModule.forRoot([
       {
         ttl: 1,
-        limit: 15,
+        limit: 1,
       },
     ]),
   ],
