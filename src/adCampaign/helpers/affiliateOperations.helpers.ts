@@ -1,12 +1,17 @@
+import { ethers } from 'ethers';
 import { getFullnodeUrl, SuiClient } from '@mysten/sui.js/client';
 import { TransactionBlock } from '@mysten/sui.js/transactions';
 import { Ed25519Keypair } from '@mysten/sui.js/keypairs/ed25519';
+import { ADCAMPAIGN_ABI } from '../ABI/adCampaignABI.base';
 
 export class HandleAffiliateSUIOperations {
   private suiClient;
   private keyPair;
+  private provider;
   constructor() {
     // const RPC_ENV = process.env.RPC_ENV as any;
+    const url = 'https://sepolia.base.org';
+    this.provider = new ethers.providers.JsonRpcProvider(url);
     this.suiClient = new SuiClient({ url: getFullnodeUrl('testnet') });
     this.keyPair = Ed25519Keypair.deriveKeypair(process.env.OWNER_MNEMONIC_KEY);
   }
@@ -43,6 +48,65 @@ export class HandleAffiliateSUIOperations {
     } catch (err) {
       console.log('-----createAffiliateCampaignProfile---err--->', err);
       throw new Error(err);
+    }
+  };
+
+  createWalletFromMnemonic(mnemonic: string): string {
+    try {
+      // Create a wallet from the mnemonic
+      const wallet = ethers.Wallet.fromMnemonic(mnemonic);
+
+      // Connect the wallet to the provider
+      const connectedWallet = wallet.connect(this.provider);
+
+      return connectedWallet.privateKey;
+    } catch (error) {
+      console.error('Error creating wallet from mnemonic:', error);
+      throw new Error('Invalid mnemonic phrase');
+    }
+  }
+
+  createAffiliateProfileInBase = async ({
+    walletAddress,
+    affiliateUID,
+    campaignUID,
+    campaignUrl,
+    originalUrl,
+  }: any) => {
+    try {
+      const mnemonicKey =
+        'plunge lemon stone icon best pudding stable milk verify amused bless reason';
+
+      const privateKey = this.createWalletFromMnemonic(mnemonicKey);
+      const signer = new ethers.Wallet(privateKey, this.provider);
+
+      const contractAddress = '0x73277A38AE70Cfb9875F6BEF76e2e8c1220415cE';
+
+      const contract = new ethers.Contract(
+        contractAddress,
+        ADCAMPAIGN_ABI,
+        signer,
+      );
+
+      console.log(contract.address);
+      console.log('---->', {
+        walletAddress,
+        affiliateUID,
+        campaignUID,
+        campaignUrl,
+        originalUrl,
+      });
+      const value = await contract.createAffiliate(
+        walletAddress,
+        affiliateUID,
+        campaignUID,
+        campaignUrl,
+        originalUrl,
+      );
+      console.log('valie--->', value.toString());
+    } catch (error) {
+      console.log('----create-affiliate-profile---', error);
+      throw error;
     }
   };
 

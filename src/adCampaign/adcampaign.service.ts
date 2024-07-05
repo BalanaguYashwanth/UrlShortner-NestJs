@@ -150,8 +150,11 @@ export class AdCampaignService {
       campaignInfoAddress,
       campaignUrl,
       profileAddress,
+      affiliateUID,
+      campaignUID,
       walletAddress,
       expirationTime,
+      originalUrl,
     } = affiliateDto;
     const currentTime = moment().unix();
 
@@ -160,6 +163,14 @@ export class AdCampaignService {
     }
 
     try {
+      // todo - base
+      // (await new HandleAffiliateSUIOperations().createAffiliateProfileInBase({
+      //   walletAddress,
+      //   affiliateUID,
+      //   campaignUID,
+      //   campaignUrl,
+      //   originalUrl,
+      // })) as any;
       const hasAffiliateExists = (await getAffiliateCampaignDetails({
         affiliateModel: this.affiliateModel,
         campaignInfoAddress,
@@ -178,6 +189,13 @@ export class AdCampaignService {
             campaignInfoAddress,
             campaignUrl,
           )) as any;
+        (await new HandleAffiliateSUIOperations().createAffiliateProfileInBase({
+          walletAddress,
+          affiliateUID,
+          campaignUID,
+          campaignUrl,
+          originalUrl,
+        })) as any;
       } else {
         await new HandleAffiliateSUIOperations().updateAffiliateProfile(
           campaignInfoAddress,

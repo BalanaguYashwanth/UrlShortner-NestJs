@@ -21,6 +21,8 @@ export class CampaignDto {
 }
 
 export class AffiliateDto {
+  affiliateUID: string;
+  campaignUID: string;
   originalUrl: string;
   campaignUrl: string;
   cpc: number;
