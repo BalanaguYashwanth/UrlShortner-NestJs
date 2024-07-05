@@ -20,7 +20,8 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
-    "@aws-sdk/client-sqs": "^3.582.0",
+    "@aws-sdk/client-kendra": "^3.598.0",
+    "@aws-sdk/client-sqs": "^3.598.0",
     "@nestjs/cache-manager": "^2.2.1",
     "@nestjs/common": "^10.0.0",
     "@nestjs/config": "^3.2.0",

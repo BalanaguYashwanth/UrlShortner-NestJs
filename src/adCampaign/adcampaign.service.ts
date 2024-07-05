@@ -143,27 +143,27 @@ export class AdCampaignService {
         walletAddress: 1,
         validClicks: 1,
         invalidClicks: 1,
-        cpc: 1, 
+        cpc: 1,
       },
     );
 
     const sortedData = data.sort((a, b) => {
-        const earningA = a.cpc * a.validClicks;
-        const earningB = b.cpc * b.validClicks;
+      const earningA = a.cpc * a.validClicks;
+      const earningB = b.cpc * b.validClicks;
 
-        if (earningA !== earningB) {
-            return earningB - earningA; 
-        }
+      if (earningA !== earningB) {
+        return earningB - earningA;
+      }
 
-        const totalClicksA = a.validClicks + a.invalidClicks;
-        const totalClicksB = b.validClicks + b.invalidClicks;
+      const totalClicksA = a.validClicks + a.invalidClicks;
+      const totalClicksB = b.validClicks + b.invalidClicks;
 
-        return totalClicksB - totalClicksA;
+      return totalClicksB - totalClicksA;
     });
 
     const transformedData = transformAffiliateData(sortedData);
     return transformedData;
-};
+  };
 
   //todo - add total clicks  = valid clicks + invalid clicks
   getAffiliateMetricsByID = async (campaignInfoAddress: string) => {
@@ -186,7 +186,12 @@ export class AdCampaignService {
     };
   };
 
-async getCampaignsByPage(page: number, limit: number, category = '', sortBy = ''): Promise<any> {
+  async getCampaignsByPage(
+    page: number,
+    limit: number,
+    category = '',
+    sortBy = '',
+  ): Promise<any> {
     page = Number(page);
     limit = Number(limit);
 
@@ -194,63 +199,68 @@ async getCampaignsByPage(page: number, limit: number, category = '', sortBy = ''
     let sortQuery: any = { createdAt: -1 };
 
     if (sortBy) {
-        if (sortBy === 'Rates Per Click') {
-            sortQuery = { cpc: -1 };
-        } else if (sortBy === 'Time Left') {
-            sortQuery = { endDate: 1 };
-        } else if (sortBy === 'Budget Left') {
-            sortQuery = { budgetLeft: -1 };
-        } else if (sortBy === 'Likes Count') {
-            sortQuery = { likesCount: -1 };
-        }
+      if (sortBy === 'Rates Per Click') {
+        sortQuery = { cpc: -1 };
+      } else if (sortBy === 'Time Left') {
+        sortQuery = { endDate: 1 };
+      } else if (sortBy === 'Budget Left') {
+        sortQuery = { budgetLeft: -1 };
+      } else if (sortBy === 'Likes Count') {
+        sortQuery = { likesCount: -1 };
+      }
     }
 
     let filterQuery: any = {};
     if (category && category !== 'All') {
-        if (category === 'Others') {
-            filterQuery = {
-                category: {
-                    $nin: [
-                        'Defi',
-                        'NFT',
-                        'Social',
-                        'Marketplace',
-                        'Meme Coin',
-                        'Dev Tooling',
-                        'Wallets',
-                        'DAO',
-                        'Gaming',
-                        'Bridge',
-                        'DEX',
-                        'SUI Overflow',
-                    ],
-                },
-            };
-        } else {
-            filterQuery = { category };
-        }
+      if (category === 'Others') {
+        filterQuery = {
+          category: {
+            $nin: [
+              'Defi',
+              'NFT',
+              'Social',
+              'Marketplace',
+              'Meme Coin',
+              'Dev Tooling',
+              'Wallets',
+              'DAO',
+              'Gaming',
+              'Bridge',
+              'DEX',
+              'SUI Overflow',
+            ],
+          },
+        };
+      } else {
+        filterQuery = { category };
+      }
     }
 
-    const totalCampaigns = await this.campaignModel.countDocuments(filterQuery).exec();
+    const totalCampaigns = await this.campaignModel
+      .countDocuments(filterQuery)
+      .exec();
     const totalPages = Math.ceil(totalCampaigns / limit);
 
     const campaigns = await this.campaignModel.aggregate([
-        { $match: filterQuery },
-        {
-            $addFields: {
-                budgetLeft: {
-                    $subtract: ['$campaignBudget', { $multiply: ['$cpc', '$validClicks'] }],
-                },
-                likesCount: { $size: { $ifNull: ['$likes', []] } },
-            },
+      { $match: filterQuery },
+      {
+        $addFields: {
+          budgetLeft: {
+            $subtract: [
+              '$campaignBudget',
+              { $multiply: ['$cpc', '$validClicks'] },
+            ],
+          },
+          likesCount: { $size: { $ifNull: ['$likes', []] } },
         },
-        { $sort: sortQuery },
-        { $skip: skip },
-        { $limit: limit },
+      },
+      { $sort: sortQuery },
+      { $skip: skip },
+      { $limit: limit },
     ]);
 
     return { campaigns, totalPages };
-};
+  }
 
   splitCoinService = async (data) => {
     try {
