@@ -17,7 +17,7 @@ export class HandleUserClicksOps {
     private readonly campaignModel: Model<any>,
   ) {
     // const RPC_ENV = process.env.RPC_ENV as any;
-    this.suiClient = new SuiClient({ url: getFullnodeUrl('mainnet') });
+    this.suiClient = new SuiClient({ url: getFullnodeUrl('testnet') });
     this.keyPair = Ed25519Keypair.deriveKeypair(process.env.OWNER_MNEMONIC_KEY);
   }
 
