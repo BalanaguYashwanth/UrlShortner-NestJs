@@ -11,12 +11,9 @@ export class HandleUserClicksOps {
   private suiClient;
   private keyPair;
   constructor(
-    @InjectModel('Affiliate')
-    private readonly affiliateModel: Model<any>,
     @InjectModel('Campaign')
     private readonly campaignModel: Model<any>,
   ) {
-    // const RPC_ENV = process.env.RPC_ENV as any;
     this.suiClient = new SuiClient({ url: getFullnodeUrl('mainnet') });
     this.keyPair = Ed25519Keypair.deriveKeypair(process.env.OWNER_MNEMONIC_KEY);
   }
@@ -42,7 +39,7 @@ export class HandleUserClicksOps {
       });
       await txResponse;
     } catch (error) {
-      console.log('---error----updateClickCount------->', error);
+      console.log('updateClickCount error====>', error);
       throw error;
     }
   };
@@ -64,7 +61,7 @@ export class HandleUserClicksOps {
       });
       await txResponse;
     } catch (err) {
-      console.log('error--->', err);
+      console.log('err=====>', err);
     }
   };
 

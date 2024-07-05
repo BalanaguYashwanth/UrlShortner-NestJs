@@ -1,7 +1,7 @@
-import * as moment from 'moment';
 import { Injectable } from '@nestjs/common';
-import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import * as moment from 'moment';
 import {
   AffiliateDto,
   CampaignDto,
@@ -10,24 +10,43 @@ import {
 } from './adCampaign.dto';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { ShortnerService } from 'src/shortner/shortner.service';
-import {
-  affiliateSaveIntoDB,
-  getAffiliateCampaignDetails,
-  HandleAffiliateSUIOperations,
-} from './helpers/affiliateOperations.helpers';
+import { AffiliateProfileService } from './service/affiliateProfile.service';
 import { transformAffiliateData } from 'src/shortner/helpers';
+import {
+  getAffiliateCampaignDetails,
+  saveAffiliateIntoDB,
+  splitCoin,
+} from './helpers';
 
 @Injectable()
 export class AdCampaignService {
+  private categories: string[];
   constructor(
     @InjectModel('Campaign')
     private readonly campaignModel: Model<any>,
-    private shortnerService: ShortnerService,
     @InjectModel('Affiliate')
     private readonly affiliateModel: Model<any>,
     @InjectModel('Supporters')
     private readonly supportersModel: Model<any>,
-  ) {}
+
+    private readonly shortnerService: ShortnerService,
+    private readonly affiliateProfileService: AffiliateProfileService,
+  ) {
+    this.categories = [
+      'Defi',
+      'NFT',
+      'Social',
+      'Marketplace',
+      'Meme Coin',
+      'Dev Tooling',
+      'Wallets',
+      'DAO',
+      'Gaming',
+      'Bridge',
+      'DEX',
+      'SUI Overflow',
+    ];
+  }
 
   createCampaign = async (campaignDto: CampaignDto) => {
     await this.campaignModel.create({
@@ -98,19 +117,27 @@ export class AdCampaignService {
 
       if (!profileTxAddress) {
         profileTxAddress =
-          (await new HandleAffiliateSUIOperations().createAffiliateProfile(
+          (await this.affiliateProfileService.createAffiliateProfile(
             campaignInfoAddress,
             campaignUrl,
           )) as any;
       } else {
-        await new HandleAffiliateSUIOperations().updateAffiliateProfile(
+        await this.affiliateProfileService.updateAffiliateProfile(
           campaignInfoAddress,
           campaignUrl,
           profileAddress,
         );
       }
 
-      await affiliateSaveIntoDB({
+      //create affiliate to associate campaign
+      await this.affiliateProfileService.createAffiliateCampaignProfile({
+        campaignInfoAddress,
+        campaignUrl,
+        profileAddress: profileTxAddress,
+        walletAddress,
+      });
+
+      await saveAffiliateIntoDB({
         affiliateModel: this.affiliateModel,
         affiliateDto,
         profileTxAddress,
@@ -119,7 +146,6 @@ export class AdCampaignService {
 
       return { campaignUrl: affiliateDto.campaignUrl };
     } catch (err) {
-      console.log('err--->', err);
       throw new Error(err);
     }
   };
@@ -215,20 +241,7 @@ export class AdCampaignService {
       if (category === 'Others') {
         filterQuery = {
           category: {
-            $nin: [
-              'Defi',
-              'NFT',
-              'Social',
-              'Marketplace',
-              'Meme Coin',
-              'Dev Tooling',
-              'Wallets',
-              'DAO',
-              'Gaming',
-              'Bridge',
-              'DEX',
-              'SUI Overflow',
-            ],
+            $nin: this.categories,
           },
         };
       } else {
@@ -264,7 +277,7 @@ export class AdCampaignService {
 
   splitCoinService = async (data) => {
     try {
-      const address = await new HandleAffiliateSUIOperations().splitCoin(data);
+      const address = await splitCoin(data);
       return address;
     } catch (err) {
       return 'unable to split';
