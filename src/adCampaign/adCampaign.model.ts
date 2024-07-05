@@ -45,6 +45,21 @@ export const AffiliateSchema = new mongoose.Schema(
     totalIPAddress: {
       type: Array,
     },
+    totalIPAddressActivity: {
+      type: [
+        {
+          date: {
+            type: String,
+            required: true,
+          },
+          ipAddress: {
+            type: [String],
+            default: [],
+          },
+        },
+      ],
+      default: [],
+    },
   },
   {
     timestamps: true,
@@ -102,7 +117,7 @@ export const CampaignSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Campaign Info Address is required'],
     },
-    companyXProfile:{
+    companyXProfile: {
       type: String,
       required: [false],
     },
@@ -131,7 +146,7 @@ export const CampaignSchema = new mongoose.Schema(
       default: 0,
     },
     likes: {
-      type: [String], 
+      type: [String],
       default: [],
     },
     dislikes: {

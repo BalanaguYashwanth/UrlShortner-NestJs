@@ -8,6 +8,7 @@ import {
   SupportersSchema,
 } from './adCampaign.model';
 import { AdCampaignController } from './adCampaign.controller';
+import { AffiliateProfileService } from './service/affiliateProfile.service';
 import { AdCampaignService } from './adcampaign.service';
 import { ShortnerModule } from 'src/shortner/shortner.module';
 import {
@@ -50,6 +51,7 @@ import {
   controllers: [AdCampaignController],
   providers: [
     AdCampaignService,
+    AffiliateProfileService,
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
