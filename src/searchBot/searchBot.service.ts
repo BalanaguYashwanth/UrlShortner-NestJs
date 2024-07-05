@@ -26,9 +26,9 @@ export class SearchBotService {
 
     try {
       const data = await this.kendraClient.send(command);
-      const textResults = data.ResultItems
-        .filter(result => result.Type === 'ANSWER' && result.Format === 'TEXT')
-        .map(result => result.DocumentExcerpt.Text);
+      const textResults = data.ResultItems.filter(
+        (result) => result.Type === 'ANSWER' && result.Format === 'TEXT',
+      ).map((result) => result.DocumentExcerpt.Text);
       return textResults;
     } catch (error) {
       console.error('Error querying Kendra:', error);

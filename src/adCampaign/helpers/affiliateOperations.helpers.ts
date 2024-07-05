@@ -124,14 +124,16 @@ export class HandleAffiliateSUIOperations {
 
   splitCoin = async ({ budget, receiverAddress }) => {
     try {
-      const txb = new TransactionBlock();
-      const [splittedCoin] = txb.splitCoins(txb.gas, [budget]);
-      txb.transferObjects([splittedCoin, txb.gas], receiverAddress);
-      await this.suiClient.signAndExecuteTransactionBlock({
-        signer: this.keyPair,
-        transactionBlock: txb,
-      });
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      //todo - correct this split logic
+      // const txb = new TransactionBlock();
+      // const [splittedCoin] = txb.splitCoins(txb.gas, [budget]);
+      // txb.transferObjects([splittedCoin, txb.gas], receiverAddress);
+      // const response = await this.suiClient.signAndExecuteTransactionBlock({
+      //   signer: this.keyPair,
+      //   transactionBlock: txb,
+      // });
+      // console.log('response--->', response);
+      // await new Promise((resolve) => setTimeout(resolve, 2000));
       const walletBalanceArr = await this.suiClient.getCoins({
         owner: receiverAddress,
       });

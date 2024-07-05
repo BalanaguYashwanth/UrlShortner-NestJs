@@ -114,4 +114,10 @@ export class AdCampaignController {
     );
   }
   ////////////supporters//////////////////
+
+  @Post('update-likes')
+  async like(@Req() req) {
+    const data = req.body;
+    return await this.adCampaignService.updateLike(data);
+  }
 }

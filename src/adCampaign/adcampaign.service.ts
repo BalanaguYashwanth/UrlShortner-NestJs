@@ -2,7 +2,13 @@ import * as moment from 'moment';
 import { Injectable } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
-import { AffiliateDto, CampaignDto, SupportersDto } from './adCampaign.dto';
+import {
+  AffiliateDto,
+  CampaignDto,
+  SupportersDto,
+  UpdateLikeDto,
+} from './adCampaign.dto';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { ShortnerService } from 'src/shortner/shortner.service';
 import {
   affiliateSaveIntoDB,
@@ -137,10 +143,25 @@ export class AdCampaignService {
         walletAddress: 1,
         validClicks: 1,
         invalidClicks: 1,
+        cpc: 1,
       },
     );
 
-    const transformedData = transformAffiliateData(data);
+    const sortedData = data.sort((a, b) => {
+      const earningA = a.cpc * a.validClicks;
+      const earningB = b.cpc * b.validClicks;
+
+      if (earningA !== earningB) {
+        return earningB - earningA;
+      }
+
+      const totalClicksA = a.validClicks + a.invalidClicks;
+      const totalClicksB = b.validClicks + b.invalidClicks;
+
+      return totalClicksB - totalClicksA;
+    });
+
+    const transformedData = transformAffiliateData(sortedData);
     return transformedData;
   };
 
@@ -165,56 +186,81 @@ export class AdCampaignService {
     };
   };
 
-  getCampaignsByPage = async (
+  async getCampaignsByPage(
     page: number,
     limit: number,
-    category: string = '',
-    sortBy: string = '',
-  ) => {
-    const skip = (page - 1) * limit;
+    category = '',
+    sortBy = '',
+  ): Promise<any> {
+    page = Number(page);
+    limit = Number(limit);
 
+    const skip = (page - 1) * limit;
     let sortQuery: any = { createdAt: -1 };
+
     if (sortBy) {
       if (sortBy === 'Rates Per Click') {
         sortQuery = { cpc: -1 };
       } else if (sortBy === 'Time Left') {
         sortQuery = { endDate: 1 };
       } else if (sortBy === 'Budget Left') {
-        sortQuery = { budget: -1 };
+        sortQuery = { budgetLeft: -1 };
+      } else if (sortBy === 'Likes Count') {
+        sortQuery = { likesCount: -1 };
       }
     }
 
     let filterQuery: any = {};
-    if (category && category !== 'Others') {
-      filterQuery = { category };
-    } else if (category === 'Others') {
-      filterQuery = {
-        category: {
-          $nin: [
-            'Defi',
-            'NFT',
-            'Social',
-            'Marketplace',
-            'Meme Coin',
-            'Dev Tooling',
-            'Wallets',
-            'DAO',
-            'Gaming',
-            'Bridge',
-            'DEX',
-          ],
-        },
-      };
+    if (category && category !== 'All') {
+      if (category === 'Others') {
+        filterQuery = {
+          category: {
+            $nin: [
+              'Defi',
+              'NFT',
+              'Social',
+              'Marketplace',
+              'Meme Coin',
+              'Dev Tooling',
+              'Wallets',
+              'DAO',
+              'Gaming',
+              'Bridge',
+              'DEX',
+              'SUI Overflow',
+            ],
+          },
+        };
+      } else {
+        filterQuery = { category };
+      }
     }
-    const totalCampaigns = await this.campaignModel.countDocuments(filterQuery);
+
+    const totalCampaigns = await this.campaignModel
+      .countDocuments(filterQuery)
+      .exec();
     const totalPages = Math.ceil(totalCampaigns / limit);
-    const campaigns = await this.campaignModel
-      .find(filterQuery)
-      .sort(sortQuery)
-      .skip(skip)
-      .limit(limit);
+
+    const campaigns = await this.campaignModel.aggregate([
+      { $match: filterQuery },
+      {
+        $addFields: {
+          budgetLeft: {
+            $subtract: [
+              '$campaignBudget',
+              { $multiply: ['$cpc', '$validClicks'] },
+            ],
+          },
+          likesCount: { $size: { $ifNull: ['$likes', []] } },
+        },
+      },
+      { $sort: sortQuery },
+      { $skip: skip },
+      { $limit: limit },
+    ]);
+
     return { campaigns, totalPages };
-  };
+  }
 
   splitCoinService = async (data) => {
     try {
@@ -224,4 +270,42 @@ export class AdCampaignService {
       return 'unable to split';
     }
   };
+
+  async updateLike(updateLikeDto: UpdateLikeDto) {
+    const { campaignId, userId, type } = updateLikeDto;
+
+    const campaign = await this.campaignModel.findOne({
+      campaignInfoAddress: campaignId,
+    });
+    if (!campaign) {
+      throw new NotFoundException('Campaign not found');
+    }
+    if (type === 'like') {
+      if (campaign.likes.includes(userId)) {
+        campaign.likes = campaign.likes.filter((id) => id !== userId);
+      } else {
+        campaign.dislikes = campaign.dislikes.filter((id) => id !== userId);
+        if (!campaign.dislikes.includes(userId)) {
+          campaign.likes.push(userId);
+        }
+      }
+    } else if (type === 'dislike') {
+      if (campaign.dislikes.includes(userId)) {
+        campaign.dislikes = campaign.dislikes.filter((id) => id !== userId);
+      } else {
+        campaign.likes = campaign.likes.filter((id) => id !== userId);
+        if (!campaign.likes.includes(userId)) {
+          campaign.dislikes.push(userId);
+        }
+      }
+    } else {
+      throw new BadRequestException('Invalid type');
+    }
+
+    await campaign.save();
+    return {
+      likes: campaign?.likes?.length,
+      dislikes: campaign?.dislikes?.length,
+    };
+  }
 }
